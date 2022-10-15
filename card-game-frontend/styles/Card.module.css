@@ -1,0 +1,43 @@
+
+.card {
+    position: absolute;
+    width: min(15vw, 15vh);
+    height: min(21vw, 21vh);
+    transform-style:preserve-3d;
+}
+
+.cardFlip {
+    transform-style:preserve-3d;
+}
+
+.innerCard {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: .5rem;
+    border-width: .5rem;
+    border-style: solid;
+    border-color: white;
+    text-align: center;
+    color: white;
+    font-size: 20pt;
+    vertical-align: middle;
+    line-height: calc(min(21vw, 21vh) - 1rem);
+    user-select: none;
+}
+
+.cardFace {
+    width: 100%;
+    height: 100%;
+    transform-origin: center;
+    transform: rotateY(180deg);
+}
+
+.cardBack {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background-color: rgb(78, 78, 78);
+}

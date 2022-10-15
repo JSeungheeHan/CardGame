@@ -1,0 +1,8 @@
+
+.container {
+    position: relative;
+    flex: 1;
+    background-color:cornflowerblue;
+    overflow: hidden;
+    perspective: 1000px; /* Remove this if you don't want the 3D effect */
+}
