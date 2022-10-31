@@ -88,10 +88,8 @@ public class Game {
 		}
 		
 		//Verify the new username is unique
-		for(Player p : players) {
-			if(p.getUsername().equals(username)) {
-				return false;
-			}
+		if(getPlayerIndex(username) != -1) {
+			return false;
 		}
 		
 		//Add the user to the game
@@ -104,7 +102,9 @@ public class Game {
 	 * This may be complicated, since the game could be under way and it could even be this player's turn.
 	 */
 	public void removePlayer(String username) {
-		//TODO: Implement
+		int playerIdx = getPlayerIndex(username);
+		players.remove(playerIdx);
+		//TODO: Make sure everything is properly fixed -- especially if it's currently this player's turn
 	}
 	
 	/**
@@ -169,6 +169,19 @@ public class Game {
 	private void endTurn() {
 		stateId++;
 		//TODO: Implement turn expiry here
+	}
+	
+	/**
+	 * Returns the index in the players List of the user with the given username
+	 * Or, returns -1 if that player doesn't exist
+	 */
+	private int getPlayerIndex(String username) {
+		for(int i = 0; i < players.size(); i++) {
+			if(players.get(i).getUsername().equals(username)) {
+				return i;
+			}
+		}
+		return -1;
 	}
 	
 }

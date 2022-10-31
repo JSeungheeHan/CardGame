@@ -17,13 +17,12 @@ public class GameEndpoint {
 	
 	@OnOpen
 	public void onOpen(Session session) {
-		System.out.println("onOpen");
+		//System.out.println("New connection.");
 	}
 	
 	
 	@OnMessage
 	public void onMessage(Session session, String messageString) {
-		System.out.println("onMessage");
 		try {
 			//Parse input
 			ClientMessage message = parser.parseClientMessage(messageString);
@@ -32,10 +31,11 @@ public class GameEndpoint {
 			//Otherwise, get the server it pertains to
 			GameServer server;
 			synchronized(gameServers) {
-				if(message.type == "createGame") {
+				if(message.type.equals("createGame")) {
 					message.gameCode = makeNewGameCode();
 					server = new GameServer(message.gameCode);
 					gameServers.put(message.gameCode, server);
+					System.out.println("Creating game " + message.gameCode + ".");
 				}else {
 					server = gameServers.get(message.gameCode);
 				}
@@ -43,28 +43,29 @@ public class GameEndpoint {
 			
 			//If the game server couldn't be found, close the connection
 			if(server == null) {
+				System.out.println("Game " + message.gameCode + " couldn't be found, closing connection.");
 				session.close();
 				return;
 			}
 			
 			//Do a different behavior based on the message's type
 			synchronized(server) {
-				if(message.type == "createGame" || message.type == "joinGame") {
+				if(message.type.equals("createGame") || message.type.equals("joinGame")) {
 					//The player wants to join the server
 					boolean success = server.addPlayer(message.username, session);
 					if(!success) {
 						session.close();
 					}
-				}else if(message.type == "draw") {
+				}else if(message.type.equals("draw")) {
 					//The player wants to draw a card
 					server.draw(message.username, message.stateId);
-				}else if(message.type == "ichi") {
+				}else if(message.type.equals("ichi")) {
 					//The player hit the "ichi" button
 					server.ichi(message.username, message.stateId);
-				}else if(message.type == "move") {
+				}else if(message.type.equals("move")) {
 					//The player selected a card
 					server.makeMove(message.username, message.stateId, message.data);
-				}else if(message.type == "startGame") {
+				}else if(message.type.equals("startGame")) {
 					//The player wants to start the game
 					server.startGame(message.username);
 				}
@@ -79,7 +80,6 @@ public class GameEndpoint {
 	
 	@OnClose
 	public void onClose(Session session) {
-		System.out.println("onClose");
 		//Go through all game servers and try to remove this session from them
 		synchronized(gameServers) {
 			for(String gameCode : gameServers.keySet()) {
@@ -87,6 +87,7 @@ public class GameEndpoint {
 				if(server.removePlayerBySession(session)) {
 					//If this server has no players left, shut it down
 					if(!server.hasPlayers()) {
+						System.out.println("Shutting down game " + gameCode);
 						gameServers.remove(gameCode);
 					}
 					break;
