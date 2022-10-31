@@ -79,7 +79,7 @@ const Card = ({ info, x, y, rotation, deckX, deckY, zIndex }: CardProps) => {
                         opacity: position.flip.to(f => f < .5 ? 1 : 0)
                     }}
                 >
-                    UNO
+                    ICHI
                 </animated.div>
             </animated.div>
         </animated.div>

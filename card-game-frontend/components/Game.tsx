@@ -5,7 +5,7 @@ import { GameState, defaultGameState, CardInfo, defaultCard, testGameStates } fr
 
 const deckCard: CardInfo = {
     id: "deck",
-    face: "deck",
+    face: "0",
     color: "special",
     revealed: false,
     selectable: true
@@ -30,17 +30,17 @@ const Game = () => {
     const deckX = .5 - cardWidth, deckY = .5;
     const pileX = .5 + cardWidth, pileY = .5;
     const cardPositions: { card: CardInfo, x: number, y: number, r: number, z: number }[] = [];
-    gameState.hands.forEach((hand, handIdx) => {
-        const handX = [.5, cardHeight/2, .5, 1 - cardHeight/2][handIdx];
-        const handY = [1 - cardHeight, .5, cardHeight, .5][handIdx];
-        const handRot = [0, -90, 0, 90][handIdx];
-        const cardOffsetX = [1, 0, 1, 0][handIdx];
-        const cardOffsetY = [0, 1, 0, -1][handIdx];
-        hand.cards.forEach((card, cardIdx) => {
+    gameState.players.forEach((player, playerIdx) => {
+        const handX = [.5, cardHeight/2, .5, 1 - cardHeight/2][playerIdx];
+        const handY = [1 - cardHeight, .5, cardHeight, .5][playerIdx];
+        const handRot = [0, -90, 0, 90][playerIdx];
+        const cardOffsetX = [1, 0, 1, 0][playerIdx];
+        const cardOffsetY = [0, 1, 0, -1][playerIdx];
+        player.hand.forEach((card, cardIdx) => {
             cardPositions.push({
                 card,
-                x: handX + cardWidth*cardOffsetX* (cardIdx - hand.cards.length/2 + .5),
-                y: handY + cardHeight*cardOffsetY* (cardIdx - hand.cards.length/2 + .5),
+                x: handX + cardWidth*cardOffsetX* (cardIdx - player.hand.length/2 + .5),
+                y: handY + cardHeight*cardOffsetY* (cardIdx - player.hand.length/2 + .5),
                 r: handRot,
                 z: cardIdx
             });
