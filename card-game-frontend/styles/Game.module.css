@@ -6,3 +6,30 @@
     overflow: hidden;
     perspective: 1000px; /* Remove this if you don't want the 3D effect */
 }
+
+.exitButton {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    background-color: rgb(38, 69, 245);
+    padding: .5rem;
+    border-radius: .5rem;
+    font-size: medium;
+    color: white;
+    margin-bottom: 1rem;
+}
+
+.exitButton:hover {
+    background-color: rgb(127, 127, 245);
+    cursor: pointer;
+}
+
+.gameCode {
+    position: absolute;
+    left: 50%;
+    top: 30%;
+    transform: translate(-50%, -50%);
+    font-size: 30px;
+    font-weight: bold;
+    color: rgb(165, 18, 18);
+}

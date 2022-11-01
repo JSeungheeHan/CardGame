@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import styles from '../styles/Game.module.css'
 import Card from './Card';
 import { GameState, defaultGameState, CardInfo, defaultCard, testGameStates } from '../utils/types';
+import { useAuth } from '../pages';
+import Nameplate from './Nameplate';
 
 const deckCard: CardInfo = {
     id: "deck",
@@ -12,30 +14,63 @@ const deckCard: CardInfo = {
 }
 
 const Game = () => {
-    const gameIndex = useRef(0);
-    const [gameState, setGameState] = useState<GameState>(testGameStates[gameIndex.current]);
+    //Load the gameState and make sure it exists
+    const { gameState, leaveGame, username } = useAuth();
+    if(gameState == undefined){
+        return <div>Error: Game state must be defined!</div>;
+    }
 
-    useEffect(() =>  {
-        const interval = setInterval(() => {
-            gameIndex.current++;
-            gameIndex.current %= testGameStates.length;
-            setGameState(testGameStates[gameIndex.current]);
-        }, 2000);
-
-        return () => clearInterval(interval);
-    }, []);
-
-    //Make a list of all the cards and their positions
+    //Decide critical values based on window dimensions
     const cardWidth = .09, cardHeight = .17;
     const deckX = .5 - cardWidth, deckY = .5;
     const pileX = .5 + cardWidth, pileY = .5;
+    let handPositions = [
+        {
+            x: .5,
+            y: 1 - cardHeight,
+            rot: 0,
+            cardOffsetX: 1,
+            cardOffsetY: 0
+        },
+        {
+            x: cardHeight/2,
+            y: .5,
+            rot: -90,
+            cardOffsetX: 0,
+            cardOffsetY: 1
+        },
+        {
+            x: .5,
+            y: cardHeight,
+            rot: 0,
+            cardOffsetX: 1,
+            cardOffsetY: 0
+        },
+        {
+            x: 1 - cardHeight/2,
+            y: .5,
+            rot: 90,
+            cardOffsetX: 0,
+            cardOffsetY: -1
+        }
+    ];
+
+    //Rotate hand positions so that this player is at the bottom
+    let playerIdx = gameState.players.findIndex(p => p.username == username);
+    if(playerIdx == -1){ playerIdx = 0; }
+    for(let i = 0; i < playerIdx; i++){
+        handPositions.unshift(handPositions.pop() as any);
+    }
+
+    //Make a list of all cards' positions
     const cardPositions: { card: CardInfo, x: number, y: number, r: number, z: number }[] = [];
     gameState.players.forEach((player, playerIdx) => {
-        const handX = [.5, cardHeight/2, .5, 1 - cardHeight/2][playerIdx];
-        const handY = [1 - cardHeight, .5, cardHeight, .5][playerIdx];
-        const handRot = [0, -90, 0, 90][playerIdx];
-        const cardOffsetX = [1, 0, 1, 0][playerIdx];
-        const cardOffsetY = [0, 1, 0, -1][playerIdx];
+        const handPos = handPositions[playerIdx];
+        const handX = handPos.x;
+        const handY = handPos.y;
+        const handRot = handPos.rot;
+        const cardOffsetX = handPos.cardOffsetX;
+        const cardOffsetY = handPos.cardOffsetY;
         player.hand.forEach((card, cardIdx) => {
             cardPositions.push({
                 card,
@@ -60,8 +95,46 @@ const Game = () => {
     })
     
     return <div className={styles.container}>
-        <Card key={deckCard.id} info={deckCard} x={deckX} y={deckY} rotation={0} deckX={deckX} deckY={deckY} zIndex={0} />
-        {cardPositions.map(({ card, x, y, r, z }) => <Card key={card.id} info={card} x={x} y={y} rotation={r} deckX={deckX} deckY={deckY} zIndex={z} />)}
+        {gameState.players.map((playerInfo, i) => (
+            <Nameplate
+                key={playerInfo.username}
+                username={playerInfo.username}
+                x={handPositions[i].x}
+                y={handPositions[i].y}
+                rotation={handPositions[i].rot}
+            />
+        ))}
+        <Card
+            key={deckCard.id}
+            info={deckCard}
+            x={deckX}
+            y={deckY}
+            rotation={0}
+            deckX={deckX}
+            deckY={deckY}
+            zIndex={0}
+        />
+        {cardPositions.map(({ card, x, y, r, z }) => (
+            <Card
+                key={card.id}
+                info={card}
+                x={x}
+                y={y}
+                rotation={r}
+                deckX={deckX}
+                deckY={deckY}
+                zIndex={z}
+            />
+        ))}
+        <div
+            className={styles.exitButton}
+            onClick={() => leaveGame()}
+        >
+            Leave Game
+        </div>
+        <div className={styles.gameCode}>
+            {gameState.gameCode}
+        </div>
     </div>;
 }
 
