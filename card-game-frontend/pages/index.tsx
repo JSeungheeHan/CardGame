@@ -4,8 +4,10 @@ import Image from 'next/image'
 import styles from '../styles/Home.module.css'
 import Game from '../components/Game'
 import { createContext, useContext, useEffect, useRef, useState } from 'react'
-import { ClientMessage, GameState, PlayerStatistics, ServerMessage } from '../utils/types'
+import { ClientMessage, GameState, PlayerStatistics, ServerMessage, testGameStates } from '../utils/types'
 import HomePage from '../components/HomePage'
+
+import { uniqueNamesGenerator, adjectives, colors, animals } from 'unique-names-generator'
 
 export interface AuthContextType {
   loggedIn: boolean;
@@ -28,11 +30,9 @@ const AuthContext = createContext<AuthContextType>({} as AuthContextType);  //{}
 const gameEndpoint = "ws://localhost:43213/IchiBackend/game";
 
 const makeGuestUsername = () => {
-  let res = "guest";
-  for(let i = 0; i < 4; i++){
-    res += Math.floor(Math.random() * 10).toString();
-  }
-  return res;
+  return uniqueNamesGenerator({
+    dictionaries: [adjectives, animals]
+  });
 };
 
 const Home: NextPage = () => {

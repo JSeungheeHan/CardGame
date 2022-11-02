@@ -19,9 +19,10 @@ interface CardProps {
     deckY: number;
     rotation: number;
     zIndex: number;
+    scale: number;
 }
 
-const Card = ({ info, x, y, rotation, deckX, deckY, zIndex }: CardProps) => {
+const Card = ({ info, x, y, rotation, deckX, deckY, zIndex, scale }: CardProps) => {
     const [position, api] = useSpring(() => ({ x: deckX, y: deckY, r: 0, flip: 0 }));
 
     useEffect(() => {
@@ -34,7 +35,7 @@ const Card = ({ info, x, y, rotation, deckX, deckY, zIndex }: CardProps) => {
                 easing: easings.easeInOutCubic
             }
         });
-    }, [x, y, rotation, api]);
+    }, [x, y, rotation, scale, api]);
 
     useEffect(() =>  {
         api.start({
@@ -50,9 +51,9 @@ const Card = ({ info, x, y, rotation, deckX, deckY, zIndex }: CardProps) => {
     return <animated.div
         className={styles.card}
         style={{
-            left: position.x.to(x => x*100 + "%"),
-            top: position.y.to(y => y*100 + "%"),
-            transform: position.r.to(r => `translate(-50%, -50%) rotate(${r}deg)`),
+            left: position.x.to(x => x + "px"),
+            top: position.y.to(y => y + "px"),
+            transform: position.r.to((r) => ` translate(-50%, -50%) scale(${scale}) rotate(${r}deg) `),
             zIndex: zIndex
         }}
     >
@@ -83,19 +84,6 @@ const Card = ({ info, x, y, rotation, deckX, deckY, zIndex }: CardProps) => {
                 </animated.div>
             </animated.div>
         </animated.div>
-    </animated.div>;
-    
-    <animated.div
-        className={styles.card}
-        style={{
-            backgroundColor: drawColor,
-            left: position.x.to(x => x*100 + "%"),
-            top: position.y.to(y => y*100 + "%"),
-            transform: position.r.to(r => `translate(-50%, -50%) rotate(${r}deg)`),
-            zIndex: zIndex
-        }}
-    >
-        {info.face}
     </animated.div>;
 };
 

@@ -69,7 +69,7 @@ const testCards: {[key: string]: CardInfo} = {
     r1: { id: "r1", face: "1", color: "red", revealed: false, selectable: false },
     r2: { id: "r2", face: "2", color: "red", revealed: false, selectable: false },
     r3: { id: "r3", face: "3", color: "red", revealed: false, selectable: false },
-    r4: { id: "r4", face: "3", color: "red", revealed: false, selectable: false },
+    r4: { id: "r4", face: "4", color: "red", revealed: false, selectable: false },
     b0: { id: "b0", face: "0", color: "blue", revealed: false, selectable: false },
     b1: { id: "b1", face: "1", color: "blue", revealed: false, selectable: false },
     b2: { id: "b2", face: "2", color: "blue", revealed: false, selectable: false },

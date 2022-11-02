@@ -14,6 +14,32 @@ const deckCard: CardInfo = {
 }
 
 const Game = () => {
+    //Figure out dimensions
+    const [width, setWidth] = useState<number>(window.innerWidth);
+    const [height, setHeight] = useState<number>(window.innerHeight);
+
+    //This code will update the dimensions as they change
+    //However, I only wanted the component to rerender after the user has stopped resizing the window
+    const updateDimensionTimeout = useRef<NodeJS.Timeout | undefined>(undefined);
+    const clearDimensionTimeout = () => {
+        if(updateDimensionTimeout.current != undefined){
+            clearInterval(updateDimensionTimeout.current);
+            updateDimensionTimeout.current = undefined;
+        }
+    }
+    useEffect(() => {
+        console.log("width", window.innerWidth, "height", window.innerHeight);
+        window.onresize = () => {
+            clearDimensionTimeout();
+            updateDimensionTimeout.current = setTimeout(() => {
+                setWidth(window.innerWidth);
+                setHeight(window.innerHeight);
+                console.log("Changing game dimensions to", window.innerWidth, window.innerHeight);
+            }, 200);
+        };
+        return clearDimensionTimeout;
+    }, []);
+
     //Load the gameState and make sure it exists
     const { gameState, leaveGame, username } = useAuth();
     if(gameState == undefined){
@@ -21,61 +47,69 @@ const Game = () => {
     }
 
     //Decide critical values based on window dimensions
-    const cardWidth = .09, cardHeight = .17;
-    const deckX = .5 - cardWidth, deckY = .5;
-    const pileX = .5 + cardWidth, pileY = .5;
+    const cardScale = Math.min(1, Math.min(width, height) / 858);
+    const cardWidth = 100 * cardScale, cardHeight = 140 * cardScale;
+    const deckX = width/2 - cardWidth, deckY = height/2;
+    const pileX = width/2 + cardWidth, pileY = height/2;
+    const nameplateHeight = 100 * cardScale;
+    const handOffset = nameplateHeight + cardHeight/2;
     let handPositions = [
         {
-            x: .5,
-            y: 1 - cardHeight,
+            x: width/2,
+            y: height - handOffset,
             rot: 0,
             cardOffsetX: 1,
-            cardOffsetY: 0
+            cardOffsetY: 0,
+            nameX: width/2,
+            nameY: height - nameplateHeight / 2
         },
         {
-            x: cardHeight/2,
-            y: .5,
+            x: handOffset,
+            y: height/2,
             rot: -90,
             cardOffsetX: 0,
-            cardOffsetY: 1
+            cardOffsetY: 1,
+            nameX: nameplateHeight / 2,
+            nameY: height / 2
         },
         {
-            x: .5,
-            y: cardHeight,
+            x: width/2,
+            y: handOffset,
             rot: 0,
             cardOffsetX: 1,
-            cardOffsetY: 0
+            cardOffsetY: 0,
+            nameX: width/2,
+            nameY: nameplateHeight/2
         },
         {
-            x: 1 - cardHeight/2,
-            y: .5,
+            x: width - handOffset,
+            y: height/2,
             rot: 90,
             cardOffsetX: 0,
-            cardOffsetY: -1
+            cardOffsetY: -1,
+            nameX: width - nameplateHeight/2,
+            nameY: height / 2
         }
     ];
 
     //Rotate hand positions so that this player is at the bottom
-    let playerIdx = gameState.players.findIndex(p => p.username == username);
-    if(playerIdx == -1){ playerIdx = 0; }
-    for(let i = 0; i < playerIdx; i++){
+    let myIdx = gameState.players.findIndex(p => p.username == username);
+    if(myIdx == -1){ myIdx = 0; }
+    for(let i = 0; i < myIdx; i++){
         handPositions.unshift(handPositions.pop() as any);
     }
 
     //Make a list of all cards' positions
     const cardPositions: { card: CardInfo, x: number, y: number, r: number, z: number }[] = [];
     gameState.players.forEach((player, playerIdx) => {
-        const handPos = handPositions[playerIdx];
-        const handX = handPos.x;
-        const handY = handPos.y;
-        const handRot = handPos.rot;
-        const cardOffsetX = handPos.cardOffsetX;
-        const cardOffsetY = handPos.cardOffsetY;
+        const { x: handX, y: handY, rot: handRot, cardOffsetX, cardOffsetY } = handPositions[playerIdx];
+        const maxHandWidth = cardWidth * (myIdx == playerIdx ? 9 : 5);
+        const cardSeparation = Math.min(cardWidth + 20*cardScale, maxHandWidth / player.hand.length);
         player.hand.forEach((card, cardIdx) => {
             cardPositions.push({
                 card,
-                x: handX + cardWidth*cardOffsetX* (cardIdx - player.hand.length/2 + .5),
-                y: handY + cardHeight*cardOffsetY* (cardIdx - player.hand.length/2 + .5),
+                x: handX + cardSeparation*cardOffsetX* (cardIdx - player.hand.length/2 + .5),
+                y: handY + cardSeparation*cardOffsetY* (cardIdx - player.hand.length/2 + .5),
                 r: handRot,
                 z: cardIdx
             });
@@ -99,9 +133,10 @@ const Game = () => {
             <Nameplate
                 key={playerInfo.username}
                 username={playerInfo.username}
-                x={handPositions[i].x}
-                y={handPositions[i].y}
+                x={handPositions[i].nameX}
+                y={handPositions[i].nameY}
                 rotation={handPositions[i].rot}
+                scale={cardScale}
             />
         ))}
         <Card
@@ -113,6 +148,7 @@ const Game = () => {
             deckX={deckX}
             deckY={deckY}
             zIndex={0}
+            scale={cardScale}
         />
         {cardPositions.map(({ card, x, y, r, z }) => (
             <Card
@@ -124,6 +160,7 @@ const Game = () => {
                 deckX={deckX}
                 deckY={deckY}
                 zIndex={z}
+                scale={cardScale}
             />
         ))}
         <div
@@ -132,7 +169,10 @@ const Game = () => {
         >
             Leave Game
         </div>
-        <div className={styles.gameCode}>
+        <div className={styles.gameCode} style={{
+            top: .3*height + "px",
+            left: .5*width + "px"
+        }}>
             {gameState.gameCode}
         </div>
     </div>;
