@@ -13,6 +13,7 @@ export interface AuthContextType {
   loggedIn: boolean;
   username: string;
   gameState: GameState | undefined;
+  joinError: string | undefined;
   login: (newUsername: string, newPassword: string) => Promise<string>;
   logout: () => void;
   createAccount: (newUsername: string, newPassword: string) => Promise<string>;
@@ -41,6 +42,7 @@ const Home: NextPage = () => {
   const [username, setUsername] = useState<string>("");
   useEffect(() => {setUsername(makeGuestUsername())}, []);
   const [gameState, setGameState] = useState<GameState | undefined>(undefined);
+  const [joinError, setJoinError] = useState<string | undefined>(undefined);
   const socketRef = useRef<WebSocket | undefined>(undefined);
   const messageQueueRef = useRef<ClientMessage[]>([]);
 
@@ -99,12 +101,16 @@ const Home: NextPage = () => {
       }
       if(msg.gameState){
         setGameState(msg.gameState);
+        setJoinError(undefined);  //clear away any error saying we couldn't join
       }
     });
 
     //Add close listener
     socketRef.current.addEventListener('close', (event) => {
       console.log("socket closed");
+      if(event.reason != ""){
+        setJoinError(event.reason);
+      }
       socketRef.current = undefined;
       messageQueueRef.current = [];
       setGameState(undefined);
@@ -253,6 +259,7 @@ const Home: NextPage = () => {
     loggedIn,
     username,
     gameState,
+    joinError,
     login,
     logout,
     createAccount,

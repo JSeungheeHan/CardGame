@@ -29,3 +29,7 @@
     margin-bottom: 1rem;
     padding: .5rem;
 }
+
+.error {
+    color: red;
+}

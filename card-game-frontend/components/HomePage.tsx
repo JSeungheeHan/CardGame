@@ -17,7 +17,7 @@ const Button = ({ text, onClick }: ButtonProps) => {
 }
 
 const HomePage = () => {
-    const { username, createGame, joinGame } = useAuth();
+    const { username, createGame, joinGame, joinError } = useAuth();
     const [codeInput, setCodeInput] = useState<string>("");
 
     return <div className={styles.background}>
@@ -26,6 +26,9 @@ const HomePage = () => {
         <Button text="Create Game" onClick={createGame} />
         <input type="text" maxLength={4} placeholder="CODE" className={styles.codeInput} value={codeInput} onChange={(e) => setCodeInput(e.target.value)} />
         <Button text="Join Game" onClick={() => joinGame(codeInput)} />
+        {joinError != undefined ? <span className={styles.error}>
+            {joinError}
+        </span> : null}
     </div>;
 };
 

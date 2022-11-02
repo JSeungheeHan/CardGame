@@ -77,6 +77,7 @@ public class GameServer {
 
 	public void timerExpire() {
 		//The current turn has expired
+		System.out.println("The timer has expired!");
 		turnTimer = null;
 		game.turnExpire();
 		broadcastGameState();
@@ -104,8 +105,7 @@ public class GameServer {
 		
 		//Start the turn timer
 		if(newTurnExpiry != -1) {
-			//TODO: Make this thread actually do what it's intended to do
-			turnTimer = new Thread();
+			turnTimer = new TurnTimerThread(this, newTurnExpiry);
 			turnTimer.start();
 		}
 	}
@@ -128,6 +128,17 @@ public class GameServer {
 				System.out.println("Error: game " + gameCode + " attempted to send message to " + username + ", but received an IOException:");
 				e.printStackTrace();
 			}
+		}
+	}
+	
+	/**
+	 * Called when the server is being closed
+	 * We can assume that all connections are already closed at this point
+	 */
+	public void shutdown() {
+		if(turnTimer != null) {
+			turnTimer.interrupt();
+			turnTimer = null;
 		}
 	}
 

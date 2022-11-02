@@ -2,6 +2,7 @@
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.websocket.CloseReason;
 import javax.websocket.OnClose;
 import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
@@ -17,7 +18,7 @@ public class GameEndpoint {
 	
 	@OnOpen
 	public void onOpen(Session session) {
-		//System.out.println("New connection.");
+		
 	}
 	
 	
@@ -44,7 +45,7 @@ public class GameEndpoint {
 			//If the game server couldn't be found, close the connection
 			if(server == null) {
 				System.out.println("Game " + message.gameCode + " couldn't be found, closing connection.");
-				session.close();
+				session.close(new CloseReason(CloseReason.CloseCodes.NORMAL_CLOSURE, "The game cannot be found."));
 				return;
 			}
 			
@@ -54,7 +55,7 @@ public class GameEndpoint {
 					//The player wants to join the server
 					boolean success = server.addPlayer(message.username, session);
 					if(!success) {
-						session.close();
+						session.close(new CloseReason(CloseReason.CloseCodes.NORMAL_CLOSURE, "The game is not accepting new players."));
 					}
 				}else if(message.type.equals("draw")) {
 					//The player wants to draw a card
@@ -88,6 +89,7 @@ public class GameEndpoint {
 					//If this server has no players left, shut it down
 					if(!server.hasPlayers()) {
 						System.out.println("Shutting down game " + gameCode);
+						server.shutdown();
 						gameServers.remove(gameCode);
 					}
 					break;
