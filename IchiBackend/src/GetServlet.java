@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * Servlet implementation class LoginServlet
  */
-@WebServlet("/login")
+@WebServlet("/get")
 public class GetServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
