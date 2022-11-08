@@ -6,6 +6,8 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Random;
 import java.util.stream.Collectors;
 
@@ -19,7 +21,7 @@ import javax.servlet.http.HttpServletResponse;
  * Servlet implementation class LoginServlet
  */
 @WebServlet("/login")
-public class LoginServlet extends HttpServlet {
+public class CreateAccountServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -54,7 +56,7 @@ public class LoginServlet extends HttpServlet {
 	
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		//INPUTS: username, password
-		//OUTPUTS: success, logged in successfully or not.
+		//OUTPUTS: success, created account successfully or not.
 		String input = request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
 		String[] strs = input.split(" ");
 		String username = strs[0];
@@ -70,32 +72,36 @@ public class LoginServlet extends HttpServlet {
 		}	
 		Statement st = null;
 		ResultSet rs = null;
-		boolean result = false;
+		boolean result = true;
 		
 		try {
-			//searches in database for entries with the given username.
 			st = con.createStatement();
-			rs = st.executeQuery("SELECT * from accountdata WHERE accountdata.Username='" + username + "'");
-			
-			//iterates through all entries with the username. THERE SHOULD ONLY BE ONE, but this is just
-			//a safety precaustion
+			rs = st.executeQuery("SELECT * FROM accountdata WHERE accountdata.Username='" + username + "';");
 			while (rs.next()) {
-				int passwordInput = hashPassword(password);
-				if(passwordInput == rs.getInt("Password"))
+				//iterates through all entries with the username. In other words, if an entry with
+				//the new username already exists, then the new account can't be created.
+				String existingUsername = rs.getString("Username");
+				if(existingUsername.equals(username))
 				{
-					//This is how you would grab the values. They don't do anything currently.
-					int gamesWon = rs.getInt("GamesWon");
-					int gamesLost = rs.getInt("GamesLost");
-					String date = rs.getString("DateJoined");
-					
-					result = true;
+					result = false;
+					break;
 				}
 			}
-
+			
+			if(result)
+			{
+				//inserts the new account into the database.
+				int pass = hashPassword(password);
+				DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+				String joinDate = dtf.format(LocalDateTime.now());
+				System.out.println(hashPassword(password));
+				String command = "INSERT INTO accountdata (Username, Password, DateJoined, GamesWon, GamesLost) VALUES ('" + username + "', " + pass + ", '" + joinDate + "', 0, 0);";
+				st.executeUpdate(command);	
+			}
 		}
 		catch (Exception ie)
 		{
-			//Catching exception if something went wrong. Should not happen though.
+			//Exception catching if failed to create an account. This shouldn't happen.
 			result = false;
 		}
 		
