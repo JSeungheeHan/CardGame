@@ -2,6 +2,7 @@ import styles from '../styles/Card.module.css'
 import { CardInfo } from '../utils/types';
 import { useSpring, easings, animated } from 'react-spring';
 import { useEffect } from 'react';
+import { useAuth } from '../pages';
 
 const drawColors = {
     red: "red",
@@ -24,6 +25,7 @@ interface CardProps {
 
 const Card = ({ info, x, y, rotation, deckX, deckY, zIndex, scale }: CardProps) => {
     const [position, api] = useSpring(() => ({ x: deckX, y: deckY, r: 0, flip: 0 }));
+    const { makeMove } = useAuth();
 
     useEffect(() => {
         api.start({
@@ -49,12 +51,25 @@ const Card = ({ info, x, y, rotation, deckX, deckY, zIndex, scale }: CardProps) 
     
     const drawColor = drawColors[info.color];
     return <animated.div
-        className={styles.card}
+        className={info.selectable ? `${styles.card} ${styles.selectable}` : styles.card}
         style={{
             left: position.x.to(x => x + "px"),
             top: position.y.to(y => y + "px"),
             transform: position.r.to((r) => ` translate(-50%, -50%) scale(${scale}) rotate(${r}deg) `),
             zIndex: zIndex
+        }}
+        onClick={async () => {
+            if(info.selectable){
+                if(info.face == 'swap'){
+                    //TODO: get which cards the player wants to swap, then make the call
+                }else if(info.face == 'wild'){
+                    //TODO: get which color the player wants it to be, then make the call
+                    //For now, let's make it always go to red
+                    makeMove([info.id, 'red']);
+                }else{
+                    makeMove([info.id]);
+                }
+            }
         }}
     >
         <animated.div

@@ -106,7 +106,7 @@ export const testGameStates: GameState[] = [
     {
         id: 1,
         players: [
-            { username: "TommyTrojan", hand: [{...testCards.r0, revealed: true}, {...testCards.g3, revealed: true}, {...testCards.y2, revealed: true}] },
+            { username: "TommyTrojan", hand: [{...testCards.r0, revealed: true}, {...testCards.g3, revealed: true, selectable: true}, {...testCards.y2, revealed: true}, {...testCards.g2, revealed: true, selectable: true}] },
             { username: "HecubaTrojan", hand: [testCards.r1, testCards.r2, testCards.b1] },
             { username: "TravellerHorse", hand: [testCards.b4, testCards.y0, testCards.y3] },
             { username: "CarolFolt", hand: [testCards.b2, testCards.b3, testCards.g0] },

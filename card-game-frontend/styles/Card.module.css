@@ -6,6 +6,14 @@
     transform-style:preserve-3d;
 }
 
+.selectable {
+    --offset: 0rem;
+    --radius: .1rem;
+    filter: drop-shadow(var(--offset) var(--offset) var(--radius) rgb(90, 244, 90)) drop-shadow(calc(-1 * var(--offset)) calc(-1 * var(--offset)) var(--radius) rgb(90, 244, 90)) drop-shadow(calc(-1 * var(--offset)) var(--offset) var(--radius) rgb(90, 244, 90)) drop-shadow(var(--offset) calc(-1 * var(--offset)) var(--radius) rgb(90, 244, 90));
+    transition-property: scale;
+    cursor: pointer;
+}
+
 .cardFlip {
     transform-style:preserve-3d;
 }

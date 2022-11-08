@@ -42,6 +42,7 @@ const Home: NextPage = () => {
   const [username, setUsername] = useState<string>("");
   useEffect(() => {setUsername(makeGuestUsername())}, []);
   const [gameState, setGameState] = useState<GameState | undefined>(undefined);
+  useEffect(() => setGameState(testGameStates[1]), []);
   const [joinError, setJoinError] = useState<string | undefined>(undefined);
   const socketRef = useRef<WebSocket | undefined>(undefined);
   const messageQueueRef = useRef<ClientMessage[]>([]);
