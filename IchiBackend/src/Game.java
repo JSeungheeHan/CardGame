@@ -52,9 +52,6 @@ public class Game {
 			state.turnExpiry = -1;
 		}
 		
-		//For testing: make turn expiry 10 seconds from now
-		state.turnExpiry = (int)(System.currentTimeMillis() / 1000L) + 10;
-		
 		//Fill in player info
 		state.players = new ArrayList<PlayerInfo>();
 		for(Player p : players) {

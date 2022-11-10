@@ -19,6 +19,7 @@ export interface AuthContextType {
   createAccount: (newUsername: string, newPassword: string) => Promise<string>;
   getStats: () => Promise<PlayerStatistics | undefined>;
   joinGame: (gameCode: string) => void;
+  startGame: () => void;
   makeMove: (cardInfo: string[]) => void;
   draw: (cardInfo: string[]) => void;
   ichi: (cardInfo: string[]) => void;
@@ -193,6 +194,23 @@ const Home: NextPage = () => {
     });
   }
 
+  const startGame = () => {
+    //Make sure we're connected to a game
+    if(socketRef.current == undefined || gameState == undefined){
+      console.log("Error: Not connected to a game.");
+      return;
+    }
+
+    //Make the message
+    queueMessage({
+      type: "startGame",
+      username: username,
+      stateId: gameState.id,
+      data: [],
+      gameCode: gameState.gameCode
+    });
+  }
+
   const makeMove = (cardInfo: string[]) => {
     //Make sure we're connected to a game
     if(socketRef.current == undefined || gameState == undefined){
@@ -266,6 +284,7 @@ const Home: NextPage = () => {
     createAccount,
     getStats,
     joinGame,
+    startGame,
     makeMove,
     draw,
     ichi,

@@ -26,8 +26,31 @@
 
 .gameCode {
     position: absolute;
-    transform: translate(-50%, -50%);
-    font-size: 30px;
+    font-size: 80px;
     font-weight: bold;
-    color: rgb(165, 18, 18);
+    color: rgb(255, 255, 255);
+    white-space: nowrap;
+}
+
+.startButton {
+    position: absolute;
+    background-color: rgb(38, 69, 245);
+    padding: 1rem;
+    border-radius: .5rem;
+    font-size: 35px;
+    font-weight:bold;
+    color: white;
+}
+
+.startButton:hover {
+    background-color: rgb(127, 127, 245);
+    cursor: pointer;
+}
+
+.uiText {
+    position: absolute;
+    font-size: 25px;
+    color: rgb(255, 255, 255);
+    white-space: nowrap;
+    font-weight: 500;
 }

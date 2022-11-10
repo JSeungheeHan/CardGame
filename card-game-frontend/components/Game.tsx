@@ -5,14 +5,6 @@ import { GameState, defaultGameState, CardInfo, defaultCard, testGameStates } fr
 import { useAuth } from '../pages';
 import Nameplate from './Nameplate';
 
-const deckCard: CardInfo = {
-    id: "deck",
-    face: "0",
-    color: "special",
-    revealed: false,
-    selectable: true
-}
-
 const Game = () => {
     //Figure out dimensions
     const [width, setWidth] = useState<number>(window.innerWidth);
@@ -41,7 +33,7 @@ const Game = () => {
     }, []);
 
     //Load the gameState and make sure it exists
-    const { gameState, leaveGame, username } = useAuth();
+    const { gameState, leaveGame, username, startGame } = useAuth();
     if(gameState == undefined){
         return <div>Error: Game state must be defined!</div>;
     }
@@ -127,7 +119,20 @@ const Game = () => {
             });
         }
     })
+
+    //Create the deck
+    const deckCard: CardInfo = {
+        id: "deck",
+        face: "0",
+        color: "special",
+        revealed: false,
+        selectable: gameState.currentPlayer != -1 && gameState.players[gameState.currentPlayer].username == username
+    }
+
+    //Figure out which state the game is in
+    const inLobby = gameState.currentPlayer == -1 && gameState.victor == -1;
     
+    //Render html
     return <div className={styles.container}>
         {gameState.players.map((playerInfo, i) => (
             <Nameplate
@@ -163,18 +168,64 @@ const Game = () => {
                 scale={cardScale}
             />
         ))}
+        {/* UI buttons and text */}
         <div
             className={styles.exitButton}
             onClick={() => leaveGame()}
         >
             Leave Game
         </div>
-        <div className={styles.gameCode} style={{
-            top: .3*height + "px",
-            left: .5*width + "px"
-        }}>
-            {gameState.gameCode}
-        </div>
+        {inLobby ? <>
+            <div className={styles.uiText} style={{
+                top: .22*height + "px",
+                left: .5*width + "px",
+                transform: `translate(-50%, -50%) scale(${cardScale})`
+            }}>
+                The game code is
+            </div>
+            <div className={styles.gameCode} style={{
+                top: .3*height + "px",
+                left: .5*width + "px",
+                transform: `translate(-50%, -50%) scale(${cardScale})`
+            }}>
+                {gameState.gameCode}
+            </div>
+            {myIdx == 0 ? <>
+                <div className={styles.uiText} style={{
+                    top: .66*height + "px",
+                    left: .5*width + "px",
+                    transform: `translate(-50%, -50%) scale(${cardScale})`
+                }}>
+                    Once everyone is in,
+                </div>
+                <div
+                    className={styles.startButton}
+                    style={{
+                        top: .76*height + "px",
+                        left: .5*width + "px",
+                        transform: `translate(-50%, -50%) scale(${cardScale})`
+                    }}
+                    onClick={startGame}
+                >
+                    Start Game
+                </div>
+            </> : <>
+                <div className={styles.uiText} style={{
+                    top: .70*height + "px",
+                    left: .5*width + "px",
+                    transform: `translate(-50%, -50%) scale(${cardScale})`
+                }}>
+                    Waiting for {gameState.players[0].username}
+                </div>
+                <div className={styles.uiText} style={{
+                    top: .75*height + "px",
+                    left: .5*width + "px",
+                    transform: `translate(-50%, -50%) scale(${cardScale})`
+                }}>
+                    to start the game
+                </div>
+            </>}
+        </> : null}
     </div>;
 }
 
