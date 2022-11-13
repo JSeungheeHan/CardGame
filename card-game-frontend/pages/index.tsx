@@ -29,7 +29,7 @@ export interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);  //{} as AuthContextType tells typescript to ignore this. It's fine, we won't use the default value anyways.
 
-const gameEndpoint = "ws://localhost:43213/IchiBackend/game";
+const gameEndpoint = "";
 
 const makeGuestUsername = () => {
   return uniqueNamesGenerator({
