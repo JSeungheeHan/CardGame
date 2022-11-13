@@ -29,7 +29,8 @@ export interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);  //{} as AuthContextType tells typescript to ignore this. It's fine, we won't use the default value anyways.
 
-const gameEndpoint = "";
+import env from '../utils/env'
+const gameEndpoint = env.gameEndpoint;
 
 const makeGuestUsername = () => {
   return uniqueNamesGenerator({
