@@ -1,5 +1,8 @@
 package com.csci201;
 
+import java.util.Collections;
+import java.util.Stack;
+
 public class Card {
 	private static final String[] Color = {
 			"red", "green", "blue",
@@ -25,7 +28,7 @@ public class Card {
 	 * @param variant 	An int that should be '1' or '2'.
 	 */
 	public Card(int color, int face, int variant) {
-		if (color > Color.length || face > Face.length ||
+		if (color > Color.length - 1 || face > Face.length - 1 ||
 			color < 0 || face < 0) {
 			System.out.println("Array OOB in Card Constructor: " + color + " " + face);
 			throw new IllegalArgumentException("Card Construction Aborted");
@@ -106,5 +109,39 @@ public class Card {
 	public void resetCard() {
 		if (face.equals("wild") || face.equals("shuffle"))
 			color = "special";
+	}
+	
+	/**
+	 * Creates the game's first deck.
+	 * @return A Stack of Card objects, shuffled.
+	 */
+	public static Stack<Card> GenerateFreshDeck() {
+		Stack<Card> deck = new Stack<>();
+		
+		// Create a fresh deck that is in order
+		for (int c = 0; c < Color.length; c++)
+			for (int f = 0; f < Face.length; f++)
+				for (int i = 0; i < 2; i++) {
+					Card card = new Card(c, f, i);
+					deck.push(card);
+				}
+		
+		Collections.shuffle(deck);
+		return deck;
+	}
+	
+	/**
+	 * Reshuffles the stack.
+	 * @param stack 	This should be the Stack<Card> 'discard pile' of the game.
+	 * @return 			A Stack of Cards that has been randomly shuffled.
+	 */
+	public static Stack<Card> ReshuffleDeck(Stack<Card> stack) {
+		Collections.shuffle(stack);
+		
+		// Go through the stack and reset the cards
+		for (Card card : stack)
+			card.resetCard();
+		
+		return stack;
 	}
 }

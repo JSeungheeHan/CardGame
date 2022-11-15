@@ -1,6 +1,7 @@
 package com.csci201;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 public class Game {
 	
@@ -15,6 +16,8 @@ public class Game {
 	private Phase currentPhase;
 	private int stateId;
 	private int turnExpiry;
+	private Stack<Card> deck;
+	private Stack<Card> discard;
 	
 	private final int MAX_PLAYERS = 4;
 	
@@ -60,6 +63,15 @@ public class Game {
 			info.username = p.getUsername();
 			info.hand = new ArrayList<CardInfo>();
 			//TODO: correctly fill in the cardInfo
+			if (currentPhase == Phase.Playing) {
+				for (Card c : p.getCards()) {
+					CardInfo cardInfo = c.toCardInfo();
+					if (info.username.equals(username))
+						cardInfo.revealed = true;
+					info.hand.add(cardInfo);
+				}
+			}
+			
 			state.players.add(info);
 		}
 		
@@ -75,7 +87,7 @@ public class Game {
 	/**
 	 * This adds the given player to the game.
 	 * Returns true if that was successful.
-	 * Returns false if the player couldn't be added (for exapmle, because the game has already begun or already has 4 players or the username is already in use).
+	 * Returns false if the player couldn't be added (for example, because the game has already begun or already has 4 players or the username is already in use).
 	 */
 	public boolean addPlayer(String username) {
 		//Verify the game is in the lobby phase
@@ -114,7 +126,22 @@ public class Game {
 	 * Returns false if the game has already been started (in which case this function doesn't do anything), and true otherwise.
 	 */
 	public boolean startGame() {
-		//TODO: Implement
+		if (currentPhase != Phase.Lobby)
+			return false;
+		
+		// Generate the starting deck
+		// Also get the first card for discard
+		deck = Card.GenerateFreshDeck();
+		discard = new Stack<>();
+		discard.push(deck.pop());
+		
+		// Draw seven cards to each player
+		for (Player player : players) {
+			while (player.handSize() < 7)
+				player.addToHand(deck.pop());
+		}
+		
+		currentPhase = Phase.Playing;
 		return true;
 	}
 	
