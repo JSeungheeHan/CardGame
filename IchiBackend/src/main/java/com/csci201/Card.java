@@ -16,6 +16,10 @@ public class Card {
 			"wild", "bomb"
 	};
 	
+	private static final int numBaseColors = 4;
+	private static final int numBaseFaces = 10;
+	private static final int numWildCards = 4;
+	
 	private String id;
 	private String color;
 	private String face;
@@ -37,6 +41,18 @@ public class Card {
 		this.color = Color[color];
 		this.face = Face[face];
 		this.id = this.face + this.color + variant;
+	}
+	
+	/**
+	 * Takes a card info and turns it into a card. This is useful for
+	 * when a player makes a move, since a Card object needs to be removed
+	 * from the player's hand and added to the discard pile.
+	 * @param cardInfo A CardInfo object,
+	 */
+	public Card(CardInfo cardInfo) {
+		this.id = cardInfo.id;
+		this.face = cardInfo.face;
+		this.color = cardInfo.color;
 	}
 	
 	/**
@@ -112,19 +128,61 @@ public class Card {
 	}
 	
 	/**
-	 * Creates the game's first deck.
+	 * Creates the game's first deck. Should create 108 cards: two of each
+	 * card 1-9 of every color, a 0 of every color, two of each special card
+	 * of each color, and finally four of each wild card
 	 * @return A Stack of Card objects, shuffled.
 	 */
 	public static Stack<Card> GenerateFreshDeck() {
 		Stack<Card> deck = new Stack<>();
 		
-		// Create a fresh deck that is in order
-		for (int c = 0; c < Color.length; c++)
-			for (int f = 0; f < Face.length; f++)
+		// Create the "0" cards
+		for (int c = 0; c < numBaseColors; c++)
+			for (int i = 0; i < 2; i++) {
+				Card card = new Card(c, 0, i);
+				deck.push(card);
+			}
+		
+		// Create all the "normal" cards
+		for (int c = 0; c < numBaseColors; c++)
+			for (int f = 1; f < numBaseFaces; f++)
 				for (int i = 0; i < 2; i++) {
 					Card card = new Card(c, f, i);
 					deck.push(card);
 				}
+		
+		// Create the Reverse Cards
+		for (int c = 0; c < numBaseColors; c++)
+			for (int i = 0; i < 2; i++) {
+				Card card = new Card(c, 10, i);
+				deck.push(card);
+			}
+		
+		// Create the Swap Cards
+		for (int c = 0; c < numBaseColors; c++)
+			for (int i = 0; i < 2; i++) {
+				Card card = new Card(c, 11, i);
+				deck.push(card);
+			}
+		
+		// Create the Shuffle Cards
+		for (int w = 0; w < numWildCards; w++) {
+			Card card = new Card(4, 12, w);
+			deck.push(card);
+		}
+		
+		// Create the Wild Cards
+		for (int w = 0; w < numWildCards; w++) {
+			Card card = new Card(4, 13, w);
+			deck.push(card);
+		}
+		
+		// Create the Bomb Cards
+		for (int c = 0; c < numBaseColors; c++)
+			for (int i = 0; i < 2; i++) {
+				Card card = new Card(c, 14, i);
+				deck.push(card);
+					}
 		
 		Collections.shuffle(deck);
 		return deck;

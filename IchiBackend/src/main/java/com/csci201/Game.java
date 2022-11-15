@@ -62,12 +62,16 @@ public class Game {
 			PlayerInfo info = new PlayerInfo();
 			info.username = p.getUsername();
 			info.hand = new ArrayList<CardInfo>();
-			//TODO: correctly fill in the cardInfo
+			
+			// Fill out card info
 			if (currentPhase == Phase.Playing) {
 				for (Card c : p.getCards()) {
 					CardInfo cardInfo = c.toCardInfo();
-					if (info.username.equals(username))
+					if (info.username.equals(username)){
 						cardInfo.revealed = true;
+						if (c.isPlayable(discard.peek()))
+							cardInfo.selectable = true;
+					}
 					info.hand.add(cardInfo);
 				}
 			}
@@ -140,9 +144,20 @@ public class Game {
 			while (player.handSize() < 7)
 				player.addToHand(deck.pop());
 		}
-		
+		PrintDiscardPeek(); // For debugging. Remove later
 		currentPhase = Phase.Playing;
 		return true;
+	}
+	
+	/**
+	 * !FOR DEBUGGING PURPOSES! This should be removed once the discard
+	 * pile can be seen.
+	 */
+	private void PrintDiscardPeek() {
+		System.out.println("Top Card Details: "
+				+ discard.peek().getColor() + " "
+				+ discard.peek().getFace() + " "
+				+ discard.peek().getId());
 	}
 	
 	/**
@@ -155,6 +170,19 @@ public class Game {
 	 */
 	public boolean makeMove(String username, int stateId, List<String> cardInfo) {
 		//TODO: Implement
+		Player player = players.get(getPlayerIndex(username));
+		Card card = player.searchForCard(cardInfo.get(0));
+		if (card == null) {
+			System.out.println("Invalid card search in player " + username + "'s hand");
+			return false;
+		}
+		
+		if (!card.isPlayable(discard.peek()))
+			return false;
+		
+		discard.add(card);
+		player.removeFromHand(card);
+		PrintDiscardPeek();
 		endTurn();
 		return true;
 	}
