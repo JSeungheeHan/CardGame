@@ -1,12 +1,12 @@
 const prod = false;    //Change this before deploying
 
 let env = {
-    gameEndpoint: "ws://localhost:43213/IchiBackend/game"
+    gameEndpoint: "ws://localhost:8080/game"
 };
 
 if(prod){
     env = {
-        gameEndpoint: "ws://ichi-backend-dot-ichi-366421.uc.r.appspot.com/IchiBackend/game"
+        gameEndpoint: "wss://backend-dot-ichi-366421.uc.r.appspot.com/game"
     }
 }
 

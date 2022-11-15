@@ -1,0 +1,7 @@
+runtime: java
+env: standard
+service: ichi-backend
+handlers:
+  - url: /.*
+    secure: always
+    script: auto
