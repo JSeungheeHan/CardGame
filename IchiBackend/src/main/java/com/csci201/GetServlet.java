@@ -57,6 +57,7 @@ public class GetServlet extends HttpServlet {
 			st = con.createStatement();
 			//Finds the entry in the table with the given username
 			rs = st.executeQuery("SELECT * from accountdata WHERE accountdata.Username='" + username + "'");
+			rs.next();
 			//Returns the value at the field of the entry if found.
 			if(field.equals("GamesWon") || field.equals("GamesLost") || field.equals("Password"))
 			{
@@ -72,6 +73,7 @@ public class GetServlet extends HttpServlet {
 		catch (Exception e)
 		{
 			//sends failure if there is an error.
+			response.getWriter().append(e.getMessage());
 			result = false;
 		}
 		

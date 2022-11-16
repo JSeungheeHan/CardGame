@@ -66,6 +66,7 @@ public class LoginServlet extends HttpServlet {
 			con = DriverManager.getConnection("jdbc:mysql://localhost/cardgame?user=root&password=root");
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
+			response.getWriter().append(e.getMessage());
 			e.printStackTrace();
 		}	
 		Statement st = null;
@@ -97,6 +98,7 @@ public class LoginServlet extends HttpServlet {
 		{
 			//Catching exception if something went wrong. Should not happen though.
 			result = false;
+			response.getWriter().append(ie.getMessage());
 		}
 		
 		//Send a response, whether login was successful or not.
