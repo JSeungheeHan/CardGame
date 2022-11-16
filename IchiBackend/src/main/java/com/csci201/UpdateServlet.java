@@ -41,7 +41,7 @@ public class UpdateServlet extends HttpServlet {
 		//Initializing necessary variables. TODO: change from localhost to public host later on.
 		Connection con = null;
 		try {
-			con = DriverManager.getConnection("jdbc:mysql://localhost/cardgame?user=root&password=root");
+			con = DriverManager.getConnection("\"jdbc:mysql:///cardgame?cloudSqlInstance=ichi-366421:us-central1:root&socketFactory=com.google.cloud.sql.mysql.SocketFactory&user=root&password=root");
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
