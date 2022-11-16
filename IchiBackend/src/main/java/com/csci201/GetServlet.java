@@ -31,6 +31,7 @@ public class GetServlet extends HttpServlet {
 	
 	
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		System.out.println("ENV var is " + System.getenv("GOOGLE_APPLICATION_CREDENTIALS"));
 		//INPUTS: username, field
 		//OUTPUTS: The value at the field. Returns null if can't read a string field, -1 if integer.
 		//Failure if the username or field does not exist.
