@@ -19,6 +19,8 @@ public class Game {
 	private int turnExpiry;
 	private Stack<Card> deck;
 	private Stack<Card> discard = new Stack<>();
+	private int currentTurn = 0;
+	private boolean turnDirection = true;
 	
 	private final int MAX_PLAYERS = 4;
 	
@@ -50,7 +52,7 @@ public class Game {
 		
 		if(currentPhase == Phase.Playing) {
 			//TODO: make this info accurate once we have implemented turns
-			state.currentPlayer = 0;
+			state.currentPlayer = currentTurn;
 			state.turnExpiry = turnExpiry;
 		}else {
 			state.currentPlayer = -1;
@@ -83,7 +85,8 @@ public class Game {
 					CardInfo cardInfo = c.toCardInfo();
 					if (info.username.equals(username)){
 						cardInfo.revealed = true;
-						if (c.isPlayable(discard.peek()))
+						if (c.isPlayable(discard.peek()) && 
+							currentTurn == getPlayerIndex(username))
 							cardInfo.selectable = true;
 					}
 					info.hand.add(cardInfo);
@@ -148,8 +151,12 @@ public class Game {
 			return false;
 		
 		// Generate the starting deck
+		// If it is a wild or shuffle card then try again
 		// Also get the first card for discard
 		deck = Card.GenerateFreshDeck();
+		while (deck.peek().getColor().equals("special")) {
+			deck = Card.ReshuffleDeck(deck);
+		}
 		discard = new Stack<>();
 		discard.push(deck.pop());
 		
@@ -237,6 +244,17 @@ public class Game {
 	 * This will increment the state id and reset the turn expiry time
 	 */
 	private void endTurn() {
+		if (turnDirection) {
+			currentTurn++;
+		} else {
+			currentTurn--;
+		}
+		
+		if (currentTurn > MAX_PLAYERS - 1)
+			currentTurn = 0;
+		if (currentTurn < 0)
+			currentTurn = MAX_PLAYERS - 1;
+		
 		stateId++;
 		//TODO: Implement turn expiry here
 	}
