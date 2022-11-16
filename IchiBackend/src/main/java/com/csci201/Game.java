@@ -1,5 +1,6 @@
 package com.csci201;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
 
@@ -17,7 +18,7 @@ public class Game {
 	private int stateId;
 	private int turnExpiry;
 	private Stack<Card> deck;
-	private Stack<Card> discard;
+	private Stack<Card> discard = new Stack<>();
 	
 	private final int MAX_PLAYERS = 4;
 	
@@ -55,6 +56,19 @@ public class Game {
 			state.currentPlayer = -1;
 			state.turnExpiry = -1;
 		}
+		
+		//Give the GameState the relevant items in the discard pile
+		List<CardInfo> topTwo = new ArrayList<>();
+		if (discard.size() > 1) {
+			Card temp = discard.pop();
+			topTwo.add(discard.peek().toCardInfo());
+			topTwo.add(temp.toCardInfo());
+			discard.push(temp);
+		} else if (discard.size() == 1) {
+			topTwo.add(discard.peek().toCardInfo());
+		}
+
+		state.playedCards = topTwo;
 		
 		//Fill in player info
 		state.players = new ArrayList<PlayerInfo>();
@@ -180,7 +194,7 @@ public class Game {
 		if (!card.isPlayable(discard.peek()))
 			return false;
 		
-		discard.add(card);
+		discard.push(card);
 		player.removeFromHand(card);
 		PrintDiscardPeek();
 		endTurn();
