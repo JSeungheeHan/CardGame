@@ -21,8 +21,8 @@ export interface AuthContextType {
   joinGame: (gameCode: string) => void;
   startGame: () => void;
   makeMove: (cardInfo: string[]) => void;
-  draw: (cardInfo: string[]) => void;
-  ichi: (cardInfo: string[]) => void;
+  draw: () => void;
+  ichi: () => void;
   createGame: () => void;
   leaveGame: () => void;
 };

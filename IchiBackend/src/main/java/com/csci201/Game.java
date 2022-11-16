@@ -1,6 +1,8 @@
 package com.csci201;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Stack;
 
 public class Game {
 	
@@ -15,6 +17,10 @@ public class Game {
 	private Phase currentPhase;
 	private int stateId;
 	private int turnExpiry;
+	private Stack<Card> deck;
+	private Stack<Card> discard = new Stack<>();
+	private int currentTurn = 0;
+	private boolean turnDirection = true;
 	
 	private final int MAX_PLAYERS = 4;
 	
@@ -46,12 +52,25 @@ public class Game {
 		
 		if(currentPhase == Phase.Playing) {
 			//TODO: make this info accurate once we have implemented turns
-			state.currentPlayer = 0;
+			state.currentPlayer = currentTurn;
 			state.turnExpiry = turnExpiry;
 		}else {
 			state.currentPlayer = -1;
 			state.turnExpiry = -1;
 		}
+		
+		//Give the GameState the relevant items in the discard pile
+		List<CardInfo> topTwo = new ArrayList<>();
+		if (discard.size() > 1) {
+			Card temp = discard.pop();
+			topTwo.add(discard.peek().toCardInfo());
+			topTwo.add(temp.toCardInfo());
+			discard.push(temp);
+		} else if (discard.size() == 1) {
+			topTwo.add(discard.peek().toCardInfo());
+		}
+
+		state.playedCards = topTwo;
 		
 		//Fill in player info
 		state.players = new ArrayList<PlayerInfo>();
@@ -59,7 +78,21 @@ public class Game {
 			PlayerInfo info = new PlayerInfo();
 			info.username = p.getUsername();
 			info.hand = new ArrayList<CardInfo>();
-			//TODO: correctly fill in the cardInfo
+			
+			// Fill out card info
+			if (currentPhase == Phase.Playing) {
+				for (Card c : p.getCards()) {
+					CardInfo cardInfo = c.toCardInfo();
+					if (info.username.equals(username)){
+						cardInfo.revealed = true;
+						if (c.isPlayable(discard.peek()) && 
+							currentTurn == getPlayerIndex(username))
+							cardInfo.selectable = true;
+					}
+					info.hand.add(cardInfo);
+				}
+			}
+			
 			state.players.add(info);
 		}
 		
@@ -75,7 +108,7 @@ public class Game {
 	/**
 	 * This adds the given player to the game.
 	 * Returns true if that was successful.
-	 * Returns false if the player couldn't be added (for exapmle, because the game has already begun or already has 4 players or the username is already in use).
+	 * Returns false if the player couldn't be added (for example, because the game has already begun or already has 4 players or the username is already in use).
 	 */
 	public boolean addPlayer(String username) {
 		//Verify the game is in the lobby phase
@@ -114,8 +147,38 @@ public class Game {
 	 * Returns false if the game has already been started (in which case this function doesn't do anything), and true otherwise.
 	 */
 	public boolean startGame() {
-		//TODO: Implement
+		if (currentPhase != Phase.Lobby)
+			return false;
+		
+		// Generate the starting deck
+		// If it is a wild or shuffle card then try again
+		// Also get the first card for discard
+		deck = Card.GenerateFreshDeck();
+		while (deck.peek().getColor().equals("special")) {
+			deck = Card.ReshuffleDeck(deck);
+		}
+		discard = new Stack<>();
+		discard.push(deck.pop());
+		
+		// Draw seven cards to each player
+		for (Player player : players) {
+			while (player.handSize() < 7)
+				player.addToHand(deck.pop());
+		}
+		PrintDiscardPeek(); // For debugging. Remove later
+		currentPhase = Phase.Playing;
 		return true;
+	}
+	
+	/**
+	 * !FOR DEBUGGING PURPOSES! This should be removed once the discard
+	 * pile can be seen.
+	 */
+	private void PrintDiscardPeek() {
+		System.out.println("Top Card Details: "
+				+ discard.peek().getColor() + " "
+				+ discard.peek().getFace() + " "
+				+ discard.peek().getId());
 	}
 	
 	/**
@@ -128,6 +191,19 @@ public class Game {
 	 */
 	public boolean makeMove(String username, int stateId, List<String> cardInfo) {
 		//TODO: Implement
+		Player player = players.get(getPlayerIndex(username));
+		Card card = player.searchForCard(cardInfo.get(0));
+		if (card == null) {
+			System.out.println("Invalid card search in player " + username + "'s hand");
+			return false;
+		}
+		
+		if (!card.isPlayable(discard.peek()))
+			return false;
+		
+		discard.push(card);
+		player.removeFromHand(card);
+		PrintDiscardPeek();
 		endTurn();
 		return true;
 	}
@@ -168,6 +244,16 @@ public class Game {
 	 * This will increment the state id and reset the turn expiry time
 	 */
 	private void endTurn() {
+		if (turnDirection)
+			currentTurn++;
+		else
+			currentTurn--;
+		
+		if (currentTurn > players.size() - 1)
+			currentTurn = 0;
+		if (currentTurn < 0)
+			currentTurn = players.size() - 1;
+		
 		stateId++;
 		//TODO: Implement turn expiry here
 	}
