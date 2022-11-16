@@ -244,16 +244,15 @@ public class Game {
 	 * This will increment the state id and reset the turn expiry time
 	 */
 	private void endTurn() {
-		if (turnDirection) {
+		if (turnDirection)
 			currentTurn++;
-		} else {
+		else
 			currentTurn--;
-		}
 		
-		if (currentTurn > MAX_PLAYERS - 1)
+		if (currentTurn > players.size() - 1)
 			currentTurn = 0;
 		if (currentTurn < 0)
-			currentTurn = MAX_PLAYERS - 1;
+			currentTurn = players.size() - 1;
 		
 		stateId++;
 		//TODO: Implement turn expiry here
