@@ -210,7 +210,19 @@ public class Game {
 	 * Returns true if that is a legal action, and false otherwise.
 	 */
 	public boolean draw(String username, int stateId) {
-		//TODO: Implement
+		//Validate the request is valid
+		int playerIdx = getPlayerIndex(username);
+		if(playerIdx == -1 || playerIdx != currentTurn) { return false; }
+		if(stateId != this.stateId) {
+			System.out.println("Rejecting draw request for invalid state id");
+			return false;
+		}
+		
+		//Draw the card
+		Player player = players.get(playerIdx);
+		player.addToHand(deck.pop());
+		
+		//End the turn
 		endTurn();
 		return true;
 	}
@@ -222,6 +234,7 @@ public class Game {
 	 */
 	public boolean ichi(String username, int stateId) {
 		//TODO: Implement
+		System.out.println("ichi was called by " + username);
 		return true;
 	}
 	
