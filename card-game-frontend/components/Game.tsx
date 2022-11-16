@@ -123,7 +123,7 @@ const Game = () => {
     //Create the deck
     const deckCard: CardInfo = {
         id: "deck",
-        face: "0",
+        face: "deck",
         color: "special",
         revealed: false,
         selectable: gameState.currentPlayer != -1 && gameState.players[gameState.currentPlayer].username == username

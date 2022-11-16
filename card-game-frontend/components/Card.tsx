@@ -25,7 +25,7 @@ interface CardProps {
 
 const Card = ({ info, x, y, rotation, deckX, deckY, zIndex, scale }: CardProps) => {
     const [position, api] = useSpring(() => ({ x: deckX, y: deckY, r: 0, flip: 0 }));
-    const { makeMove } = useAuth();
+    const { makeMove, draw } = useAuth();
 
     useEffect(() => {
         api.start({
@@ -60,7 +60,11 @@ const Card = ({ info, x, y, rotation, deckX, deckY, zIndex, scale }: CardProps) 
         }}
         onClick={async () => {
             if(info.selectable){
-                if(info.face == 'swap'){
+                if(info.face == 'deck'){
+                    //This is the deck, so draw a card
+                    draw();
+                }
+                else if(info.face == 'swap'){
                     //TODO: get which cards the player wants to swap, then make the call
                 }else if(info.face == 'wild'){
                     //TODO: get which color the player wants it to be, then make the call
