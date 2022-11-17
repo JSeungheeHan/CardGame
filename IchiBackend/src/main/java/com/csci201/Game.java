@@ -190,9 +190,7 @@ public class Game {
 	 * Returns true if that is a legal action, and false otherwise.
 	 */
 	public boolean makeMove(String username, int stateId, List<String> cardInfo) {
-		//TODO: Implement
 		if(!playerWithEmptyHandExists) {
-			//TODO: Wild Card and Swap Card
 			//Validate the request is valid
 			int playerIdx = getPlayerIndex(username);
 			if(playerIdx == -1 || playerIdx != currentTurn) { return false; }
@@ -211,19 +209,43 @@ public class Game {
 			if (!card.isPlayable(discard.peek()))
 				return false;
 		
-			// Reverse Card implementation
-			if (card.getFace().equals("reverse"))
-				turnDirection = false;
-		
-			// Bomb Card implementation
-			if (card.getFace().equals("bomb"))
-				bombSet = true;
-		
+			// Swap Card implementation
+			// This has to come before 'actually' playing the card, since if
+			// if it is an invalid move we don't want to change any hands.
+			// Uncomment this once cardInfo 1 and 2 are sent
+//			if (card.getFace().equals("swap")) {
+//				Player otherPlayer = null;
+//				Card otherCard = null;
+//				Card chosenCard = player.searchForCard(cardInfo.get(1));
+//				for (Player p : players) {
+//					Card temp = p.searchForCard(cardInfo.get(2));
+//					if (temp != null) {
+//						otherPlayer = p;
+//						otherCard = temp;
+//					}
+//				}
+//				if (otherPlayer == null || otherCard == null)
+//					return false;
+//				
+//				otherPlayer.removeFromHand(otherCard);
+//				player.removeFromHand(chosenCard);
+//				otherPlayer.addToHand(chosenCard);
+//				player.addToHand(otherCard);
+//			}
+			
+			// Move card from player's hand to the discard pile
 			discard.push(card);
 			player.removeFromHand(card);
 			
+			// Reverse Card implementation
+			if (card.getFace().equals("reverse"))
+				turnDirection = false;
+					
+			// Bomb Card implementation
+			if (card.getFace().equals("bomb"))
+				bombSet = true;
+			
 			// Shuffle Card implementation
-			// This has to come after removing the shuffle card from the player's hand
 			if (card.getFace().equals("shuffle")) {
 				//TODO: Change color of card to selected color.
 				int handSize = player.handSize();
@@ -235,7 +257,17 @@ public class Game {
 				for (int h = 0; h < handSize; h++) {
 					player.addToHand(deck.pop());
 				}
+				
+				//Uncomment this once cardInfo 1 is sent
+				//card.setColor(cardInfo.get(1));
 			}
+			
+			// Wild Card implementation
+			if (card.getFace().equals("wild")) {
+				card.setColor(cardInfo.get(1));
+			}
+			
+			
 			
 			PrintDiscardPeek();
 			endTurn();

@@ -128,6 +128,21 @@ public class Card {
 	}
 	
 	/**
+	 * Sets the cards color to something else. Can only be used on shuffle and wild cards.
+	 * If used on other cards this does nothing.
+	 */
+	public void setColor(String color) {
+		if (color == null) {
+			System.out.println("null color in set color");
+			return;
+		}
+		if (this.color.equals("special"))
+			this.color = color;
+		else
+			System.out.println("Cannot change card of color " + this.color + " to " + color);
+	}
+	
+	/**
 	 * Creates the game's first deck. Should create 108 cards: two of each
 	 * card 1-9 of every color, a 0 of every color, two of each special card
 	 * of each color, and finally four of each wild card
