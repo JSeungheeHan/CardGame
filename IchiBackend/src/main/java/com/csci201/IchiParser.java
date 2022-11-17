@@ -20,7 +20,8 @@ class IchiParser {
 	}
 	
 	public String stringifyServerMessage(ServerMessage message) {
-		return gson.toJson(message);
+		String res = gson.toJson(message);
+		return res;
 	}
 
 }

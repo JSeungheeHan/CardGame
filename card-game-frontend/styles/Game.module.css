@@ -54,3 +54,20 @@
     white-space: nowrap;
     font-weight: 500;
 }
+
+.ichiButton {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background-color: rgb(186, 19, 242);
+    padding: 1rem;
+    border-radius: .5rem;
+    font-size: x-large;
+    color: white;
+    margin-bottom: 1rem;
+}
+
+.ichiButton:hover {
+    background-color: rgb(171, 114, 190);
+    cursor: pointer;
+}

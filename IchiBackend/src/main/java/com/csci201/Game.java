@@ -17,7 +17,7 @@ public class Game {
 	private Phase currentPhase;
 	private int stateId;
 	private int turnExpiry;
-	private Stack<Card> deck;
+	private Stack<Card> deck = new Stack<>();
 	private Stack<Card> discard = new Stack<>();
 	private int currentTurn = 0;
 	private boolean turnDirection = true;
@@ -69,8 +69,9 @@ public class Game {
 		} else if (discard.size() == 1) {
 			topTwo.add(discard.peek().toCardInfo());
 		}
-
+		for(CardInfo i : topTwo) { i.revealed = true; }
 		state.playedCards = topTwo;
+		state.remainingCards = deck.size();
 		
 		//Fill in player info
 		state.players = new ArrayList<PlayerInfo>();
@@ -95,11 +96,6 @@ public class Game {
 			
 			state.players.add(info);
 		}
-		
-		//Fill in deck and stack info
-		//TODO: make these values accurate once we have implemented the card deck and stack
-		state.playedCards = new ArrayList<CardInfo>();
-		state.remainingCards = 100;
 		
 		//Return
 		return state;
@@ -214,7 +210,19 @@ public class Game {
 	 * Returns true if that is a legal action, and false otherwise.
 	 */
 	public boolean draw(String username, int stateId) {
-		//TODO: Implement
+		//Validate the request is valid
+		int playerIdx = getPlayerIndex(username);
+		if(playerIdx == -1 || playerIdx != currentTurn) { return false; }
+		if(stateId != this.stateId) {
+			System.out.println("Rejecting draw request for invalid state id");
+			return false;
+		}
+		
+		//Draw the card
+		Player player = players.get(playerIdx);
+		player.addToHand(deck.pop());
+		
+		//End the turn
 		endTurn();
 		return true;
 	}
@@ -226,6 +234,7 @@ public class Game {
 	 */
 	public boolean ichi(String username, int stateId) {
 		//TODO: Implement
+		System.out.println("ichi was called by " + username);
 		return true;
 	}
 	

@@ -33,7 +33,7 @@ const Game = () => {
     }, []);
 
     //Load the gameState and make sure it exists
-    const { gameState, leaveGame, username, startGame } = useAuth();
+    const { gameState, leaveGame, username, startGame, ichi } = useAuth();
     if(gameState == undefined){
         return <div>Error: Game state must be defined!</div>;
     }
@@ -131,6 +131,7 @@ const Game = () => {
 
     //Figure out which state the game is in
     const inLobby = gameState.currentPlayer == -1 && gameState.victor == -1;
+    const canIchi = gameState.currentPlayer != -1 && gameState.victor == -1;
     
     //Render html
     return <div className={styles.container}>
@@ -225,6 +226,14 @@ const Game = () => {
                     to start the game
                 </div>
             </>}
+        </> : null}
+        {canIchi ? <>
+            <div
+                className={styles.ichiButton}
+                onClick={() => ichi()}
+            >
+                Ichi!
+            </div>
         </> : null}
     </div>;
 }
