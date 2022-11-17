@@ -22,6 +22,8 @@ public class Game {
 	private int currentTurn = 0;
 	private boolean turnDirection = true;
 	private boolean bombSet = false;
+	private int firstPlayerWithEmptyHand = -1;
+	private boolean playerWithEmptyHandExists = false;
 	
 	private final int MAX_PLAYERS = 4;
 	
@@ -47,6 +49,7 @@ public class Game {
 		//Fill in phase-based info
 		if(currentPhase == Phase.Finished) {
 			//TODO: Once a victor is determined, reflect that here
+			state.victor = firstPlayerWithEmptyHand;
 		}else {
 			state.victor = -1;
 		}
@@ -188,37 +191,46 @@ public class Game {
 	 */
 	public boolean makeMove(String username, int stateId, List<String> cardInfo) {
 		//TODO: Implement
-		//Validate the request is valid
-		int playerIdx = getPlayerIndex(username);
-		if(playerIdx == -1 || playerIdx != currentTurn) { return false; }
-		if(stateId != this.stateId) {
-			System.out.println("Rejecting move request for invalid state id");
-			return false;
+		if(!playerWithEmptyHandExists) {
+			//Validate the request is valid
+			int playerIdx = getPlayerIndex(username);
+			if(playerIdx == -1 || playerIdx != currentTurn) { return false; }
+			if(stateId != this.stateId) {
+				System.out.println("Rejecting move request for invalid state id");
+				return false;
+			}
+		
+			Player player = players.get(playerIdx);
+			Card card = player.searchForCard(cardInfo.get(0));
+			if (card == null) {
+				System.out.println("Invalid card search in player " + username + "'s hand");
+				return false;
+			}
+		
+			if (!card.isPlayable(discard.peek()))
+				return false;
+		
+			// Reverse Card implementation
+			if (card.getFace().equals("reverse"))
+				turnDirection = false;
+		
+			// Bomb Card implementation
+			if (card.getFace().equals("bomb"))
+				bombSet = true;
+		
+			discard.push(card);
+			player.removeFromHand(card);
+			PrintDiscardPeek();
+			endTurn();
+			
+			checkForEmptyHand();
+			
+			return true;
+		} else {
+			System.out.printf("Player %s has won the game!\n", players.get(firstPlayerWithEmptyHand).getUsername());
+			currentPhase = Phase.Finished;
+			return true;
 		}
-		
-		Player player = players.get(playerIdx);
-		Card card = player.searchForCard(cardInfo.get(0));
-		if (card == null) {
-			System.out.println("Invalid card search in player " + username + "'s hand");
-			return false;
-		}
-		
-		if (!card.isPlayable(discard.peek()))
-			return false;
-		
-		// Reverse Card implementation
-		if (card.getFace().equals("reverse"))
-			turnDirection = false;
-		
-		// Bomb Card implementation
-		if (card.getFace().equals("bomb"))
-			bombSet = true;
-		
-		discard.push(card);
-		player.removeFromHand(card);
-		PrintDiscardPeek();
-		endTurn();
-		return true;
 	}
 	
 	/**
@@ -319,4 +331,18 @@ public class Game {
 		return -1;
 	}
 	
+	/**
+	 *  Determines if a player has no remaining cards.
+	 *  Once a player has no remaining cards, they've won the game
+	 */
+	private void checkForEmptyHand() {
+		for(int i = 0; i < players.size(); i++) {
+			if(players.get(i).handSize() == 0) {
+				int playerIndex = getPlayerIndex(players.get(i).getUsername());
+				firstPlayerWithEmptyHand = playerIndex;
+				playerWithEmptyHandExists = true;
+				break;
+			}
+		}
+	}
 }
