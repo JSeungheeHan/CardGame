@@ -126,6 +126,12 @@
         <groupId>org.eclipse.jetty</groupId>
         <artifactId>jetty-maven-plugin</artifactId>
         <version>${jetty.version}</version>
+        <configuration>
+        <env>
+	        <GOOGLE_APPLICATION_CREDENTIALS>./application_default_credentials.json</GOOGLE_APPLICATION_CREDENTIALS>
+	        <test>test</test>
+      	</env>
+        </configuration>
       </plugin>
     </plugins>
   </build>
