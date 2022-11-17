@@ -21,6 +21,7 @@ public class Game {
 	private Stack<Card> discard = new Stack<>();
 	private int currentTurn = 0;
 	private boolean turnDirection = true;
+	private boolean bombSet = false;
 	
 	private final int MAX_PLAYERS = 4;
 	
@@ -187,7 +188,15 @@ public class Game {
 	 */
 	public boolean makeMove(String username, int stateId, List<String> cardInfo) {
 		//TODO: Implement
-		Player player = players.get(getPlayerIndex(username));
+		//Validate the request is valid
+		int playerIdx = getPlayerIndex(username);
+		if(playerIdx == -1 || playerIdx != currentTurn) { return false; }
+		if(stateId != this.stateId) {
+			System.out.println("Rejecting move request for invalid state id");
+			return false;
+		}
+		
+		Player player = players.get(playerIdx);
 		Card card = player.searchForCard(cardInfo.get(0));
 		if (card == null) {
 			System.out.println("Invalid card search in player " + username + "'s hand");
@@ -196,6 +205,14 @@ public class Game {
 		
 		if (!card.isPlayable(discard.peek()))
 			return false;
+		
+		// Reverse Card implementation
+		if (card.getFace().equals("reverse"))
+			turnDirection = false;
+		
+		// Bomb Card implementation
+		if (card.getFace().equals("bomb"))
+			bombSet = true;
 		
 		discard.push(card);
 		player.removeFromHand(card);
@@ -221,6 +238,28 @@ public class Game {
 		//Draw the card
 		Player player = players.get(playerIdx);
 		player.addToHand(deck.pop());
+		
+		// If the last card is drawn reset the deck and the stack
+		if (deck.isEmpty()) {
+			Card top = discard.pop();
+			deck = Card.ReshuffleDeck(discard);
+			discard.push(top);
+		}
+		
+		// Bomb Card implementation
+		if (bombSet) {
+			if (deck.size() <= 2)
+			{
+				Card top = discard.pop();
+				deck = Card.ReshuffleDeck(discard);
+				discard.push(top);
+			}
+			
+			player.addToHand(deck.pop());
+			player.addToHand(deck.pop());
+			
+			bombSet = false;
+		}
 		
 		//End the turn
 		endTurn();
