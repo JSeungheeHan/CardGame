@@ -34,6 +34,15 @@ public class Player {
 		return playerCards;
 	}
 	
+	/**
+	 * Warning! This will erase the player's hand, so make sure you have moves
+	 * all the cards in the player's hand to somewhere else first. Otherwise,
+	 * they are gone forever! (Or until a new game is started)
+	 */
+	public void clearHand() {
+		playerCards = new ArrayList<Card>();
+	}
+	
 	public Card searchForCard(String id) {
 		Card card = null;
 		for (Card c : playerCards) {

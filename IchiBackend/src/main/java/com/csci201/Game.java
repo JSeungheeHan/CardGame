@@ -192,6 +192,7 @@ public class Game {
 	public boolean makeMove(String username, int stateId, List<String> cardInfo) {
 		//TODO: Implement
 		if(!playerWithEmptyHandExists) {
+			//TODO: Wild Card and Swap Card
 			//Validate the request is valid
 			int playerIdx = getPlayerIndex(username);
 			if(playerIdx == -1 || playerIdx != currentTurn) { return false; }
@@ -220,6 +221,22 @@ public class Game {
 		
 			discard.push(card);
 			player.removeFromHand(card);
+			
+			// Shuffle Card implementation
+			// This has to come after removing the shuffle card from the player's hand
+			if (card.getFace().equals("shuffle")) {
+				//TODO: Change color of card to selected color.
+				int handSize = player.handSize();
+				for (Card c : player.getCards()) {
+					deck.push(c);
+				}
+				player.clearHand();
+				deck = Card.ReshuffleDeck(deck);
+				for (int h = 0; h < handSize; h++) {
+					player.addToHand(deck.pop());
+				}
+			}
+			
 			PrintDiscardPeek();
 			endTurn();
 			
