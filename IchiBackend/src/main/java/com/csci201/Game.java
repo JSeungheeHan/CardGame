@@ -219,6 +219,11 @@ public class Game {
 			
 		// Player's turn is finished
 		endTurn();
+		
+		// Check if Player is an Ichi candidate - has one card remaining
+		if(player.handSize() == 1) {
+			player.setIchiStatus(true);
+		}
 			
 		// Check if Player has no more cards - determines Game Victor
 		if(player.handSize() == 0) {
@@ -342,8 +347,47 @@ public class Game {
 	 */
 	public boolean ichi(String username, int stateId) {
 		//TODO: Implement
-		System.out.println("ichi was called by " + username);
-		return true;
+		if(stateId != this.stateId) {
+			System.out.println("Rejecting ichi request for invalid state id");
+			return false;
+		}
+		
+		if(!searchForIchiCandidates()) {
+			System.out.printf("Player: %s has called Ichi! but... there are no Ichi candidates.\n", username);
+			return false;
+		} else {
+			System.out.printf("Player: %s has called Ichi! This player is safe but all other Ichi candidates must draw 2 cards.\n", username);
+			ichiCandidatesDraw2(username);
+			return true;
+		}
+	}
+	
+	private boolean searchForIchiCandidates() {
+		for(int i = 0; i < players.size(); i++) {
+			boolean ichiStatus = players.get(i).getIchiStatus();
+			if(ichiStatus) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private void ichiCandidatesDraw2(String username) {
+		for(int i = 0; i < players.size(); i++) {
+			boolean ichiStatus = players.get(i).getIchiStatus();
+			String pUsername = players.get(i).getUsername();
+			if(ichiStatus && !pUsername.equals(username)) {
+				if (deck.size() <= 2) {
+					Card top = discard.pop();
+					deck = Card.ReshuffleDeck(discard);
+					discard.push(top);
+				}
+				
+				players.get(i).addToHand(deck.pop());
+				players.get(i).addToHand(deck.pop());
+			}
+			players.get(i).setIchiStatus(false);
+		}
 	}
 	
 	/**

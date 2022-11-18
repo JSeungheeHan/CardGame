@@ -6,11 +6,11 @@ public class Player {
 	private List<Card> playerCards = new ArrayList<>();
 	
 	private String username;
-	private boolean ichiCalled;
+	private boolean ichiStatus;
 	
-	public Player(String username, boolean ichiCalled) {
+	public Player(String username, boolean ichiStatus) {
 		this.username = username;
-		this.ichiCalled = ichiCalled;
+		this.ichiStatus = ichiStatus;
 	}
 	
 	public String getUsername() {
@@ -18,7 +18,11 @@ public class Player {
 	}
 	
 	public boolean getIchiStatus() {
-		return ichiCalled;
+		return ichiStatus;
+	}
+	
+	public void setIchiStatus(boolean ichiStatus) {
+		this.ichiStatus = ichiStatus;
 	}
 	
 	/**
