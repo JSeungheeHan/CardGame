@@ -23,7 +23,6 @@ public class Game {
 	private boolean turnDirection = true;
 	private boolean bombSet = false;
 	private int firstPlayerWithEmptyHand = -1;
-	private boolean playerWithEmptyHandExists = false;
 	
 	private final int MAX_PLAYERS = 4;
 	
@@ -127,7 +126,7 @@ public class Game {
 		}
 		
 		//Add the user to the game
-		players.add(new Player(username));
+		players.add(new Player(username, false));
 		return true;
 	}
 	
@@ -190,96 +189,105 @@ public class Game {
 	 * Returns true if that is a legal action, and false otherwise.
 	 */
 	public boolean makeMove(String username, int stateId, List<String> cardInfo) {
-		if(!playerWithEmptyHandExists) {
-			//Validate the request is valid
-			int playerIdx = getPlayerIndex(username);
-			if(playerIdx == -1 || playerIdx != currentTurn) { return false; }
-			if(stateId != this.stateId) {
-				System.out.println("Rejecting move request for invalid state id");
-				return false;
-			}
-		
-			Player player = players.get(playerIdx);
-			Card card = player.searchForCard(cardInfo.get(0));
-			if (card == null) {
-				System.out.println("Invalid card search in player " + username + "'s hand");
-				return false;
-			}
-		
-			if (!card.isPlayable(discard.peek()))
-				return false;
-		
-			// Swap Card implementation
-			// This has to come before 'actually' playing the card, since if
-			// if it is an invalid move we don't want to change any hands.
-			// Uncomment this once cardInfo 1 and 2 are sent
-//			if (card.getFace().equals("swap")) {
-//				Player otherPlayer = null;
-//				Card otherCard = null;
-//				Card chosenCard = player.searchForCard(cardInfo.get(1));
-//				for (Player p : players) {
-//					Card temp = p.searchForCard(cardInfo.get(2));
-//					if (temp != null) {
-//						otherPlayer = p;
-//						otherCard = temp;
-//					}
-//				}
-//				if (otherPlayer == null || otherCard == null)
-//					return false;
-//				
-//				otherPlayer.removeFromHand(otherCard);
-//				player.removeFromHand(chosenCard);
-//				otherPlayer.addToHand(chosenCard);
-//				player.addToHand(otherCard);
-//			}
-			
-			// Move card from player's hand to the discard pile
-			discard.push(card);
-			player.removeFromHand(card);
-			
-			// Reverse Card implementation
-			if (card.getFace().equals("reverse"))
-				turnDirection = false;
-					
-			// Bomb Card implementation
-			if (card.getFace().equals("bomb"))
-				bombSet = true;
-			
-			// Shuffle Card implementation
-			if (card.getFace().equals("shuffle")) {
-				//TODO: Change color of card to selected color.
-				int handSize = player.handSize();
-				for (Card c : player.getCards()) {
-					deck.push(c);
-				}
-				player.clearHand();
-				deck = Card.ReshuffleDeck(deck);
-				for (int h = 0; h < handSize; h++) {
-					player.addToHand(deck.pop());
-				}
-				
-				//Uncomment this once cardInfo 1 is sent
-				//card.setColor(cardInfo.get(1));
-			}
-			
-			// Wild Card implementation
-			if (card.getFace().equals("wild")) {
-				card.setColor(cardInfo.get(1));
-			}
-			
-			
-			
-			PrintDiscardPeek();
-			endTurn();
-			
-			checkForEmptyHand();
-			
-			return true;
-		} else {
-			System.out.printf("Player %s has won the game!\n", players.get(firstPlayerWithEmptyHand).getUsername());
-			currentPhase = Phase.Finished;
-			return true;
+		// Ensure the request is valid
+		int playerIdx = getPlayerIndex(username);
+		if(playerIdx == -1 || playerIdx != currentTurn) { return false; }
+		if(stateId != this.stateId) {
+			System.out.println("Rejecting move request for invalid state id");
+			return false;
 		}
+		
+		Player player = players.get(playerIdx);
+		Card card = player.searchForCard(cardInfo.get(0));
+		if (card == null) {
+			System.out.println("Invalid card search in player " + username + "'s hand");
+			return false;
+		}
+		
+		if (!card.isPlayable(discard.peek()))
+			return false;
+			
+		// Move card from player's hand to the discard pile
+		discard.push(card);
+		player.removeFromHand(card);
+			
+		// Handle special cards
+		specialCardImplementation(card, player, cardInfo);
+			
+		// Debugging Purposes
+		PrintDiscardPeek();
+			
+		// Player's turn is finished
+		endTurn();
+			
+		// Check if Player has no more cards - determines Game Victor
+		if(player.handSize() == 0) {
+			System.out.printf("Player: %s has won the game!\n", username);
+			currentPhase = Phase.Finished;
+			firstPlayerWithEmptyHand = playerIdx;
+		}
+			
+		return true;
+	}
+	
+	/**
+	 * Helper function for makeMove to handle special card cases after placing card into discard pile
+	 * e.g., reverse, bomb, shuffle, etc.
+	 */
+	private void specialCardImplementation(Card card, Player player, List<String> cardInfo) {
+		// Reverse Card implementation
+		if (card.getFace().equals("reverse"))
+			turnDirection = false;
+							
+		// Bomb Card implementation
+		if (card.getFace().equals("bomb"))
+			bombSet = true;
+					
+		// Shuffle Card implementation
+		if (card.getFace().equals("shuffle")) {
+			//TODO: Change color of card to selected color.
+			int handSize = player.handSize();
+			for (Card c : player.getCards()) {
+				deck.push(c);
+			}
+			player.clearHand();
+			deck = Card.ReshuffleDeck(deck);
+			for (int h = 0; h < handSize; h++) {
+				player.addToHand(deck.pop());
+			}
+						
+			//Uncomment this once cardInfo 1 is sent
+			//card.setColor(cardInfo.get(1));
+		}
+					
+		// Wild Card implementation
+		if (card.getFace().equals("wild")) {
+			card.setColor(cardInfo.get(1));
+		}
+		
+		// Swap Card implementation
+		// This has to come before 'actually' playing the card, since if
+		// if it is an invalid move we don't want to change any hands.
+		// Uncomment this once cardInfo 1 and 2 are sent
+//		if (card.getFace().equals("swap")) {
+//			Player otherPlayer = null;
+//			Card otherCard = null;
+//			Card chosenCard = player.searchForCard(cardInfo.get(1));
+//			for (Player p : players) {
+//				Card temp = p.searchForCard(cardInfo.get(2));
+//				if (temp != null) {
+//					otherPlayer = p;
+//					otherCard = temp;
+//				}
+//			}
+//			if (otherPlayer == null || otherCard == null)
+//				return false;
+//						
+//			otherPlayer.removeFromHand(otherCard);
+//			player.removeFromHand(chosenCard);
+//			otherPlayer.addToHand(chosenCard);
+//			player.addToHand(otherCard);
+//		}
 	}
 	
 	/**
@@ -378,20 +386,5 @@ public class Game {
 			}
 		}
 		return -1;
-	}
-	
-	/**
-	 *  Determines if a player has no remaining cards.
-	 *  Once a player has no remaining cards, they've won the game
-	 */
-	private void checkForEmptyHand() {
-		for(int i = 0; i < players.size(); i++) {
-			if(players.get(i).handSize() == 0) {
-				int playerIndex = getPlayerIndex(players.get(i).getUsername());
-				firstPlayerWithEmptyHand = playerIndex;
-				playerWithEmptyHandExists = true;
-				break;
-			}
-		}
 	}
 }

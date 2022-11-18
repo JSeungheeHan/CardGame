@@ -6,13 +6,19 @@ public class Player {
 	private List<Card> playerCards = new ArrayList<>();
 	
 	private String username;
+	private boolean ichiCalled;
 	
-	public Player(String username) {
+	public Player(String username, boolean ichiCalled) {
 		this.username = username;
+		this.ichiCalled = ichiCalled;
 	}
 	
 	public String getUsername() {
 		return username;
+	}
+	
+	public boolean getIchiStatus() {
+		return ichiCalled;
 	}
 	
 	/**
