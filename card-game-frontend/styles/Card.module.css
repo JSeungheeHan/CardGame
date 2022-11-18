@@ -32,6 +32,7 @@
     vertical-align: middle;
     line-height: calc(140px - .7rem);
     user-select: none;
+    background-color: white;
 }
 
 .cardFace {
@@ -49,3 +50,4 @@
     left: 0;
     background-color: rgb(78, 78, 78);
 }
+

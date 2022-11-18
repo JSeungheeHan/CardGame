@@ -212,7 +212,11 @@ public class Game {
 		player.removeFromHand(card);
 			
 		// Handle special cards
-		specialCardImplementation(card, player, cardInfo);
+		boolean specialCardRes = specialCardImplementation(card, player, cardInfo);
+		if(!specialCardRes){
+			//The special card was invalid
+			return false;
+		}
 			
 		// Debugging Purposes
 		PrintDiscardPeek();
@@ -239,18 +243,22 @@ public class Game {
 	 * Helper function for makeMove to handle special card cases after placing card into discard pile
 	 * e.g., reverse, bomb, shuffle, etc.
 	 */
-	private void specialCardImplementation(Card card, Player player, List<String> cardInfo) {
+	private boolean specialCardImplementation(Card card, Player player, List<String> cardInfo) {
 		// Reverse Card implementation
-		if (card.getFace().equals("reverse"))
-			turnDirection = false;
+		if (card.getFace().equals("reverse")){
+			turnDirection = !turnDirection;
+			return true;
+		}
 							
 		// Bomb Card implementation
-		if (card.getFace().equals("bomb"))
+		if (card.getFace().equals("bomb")){
 			bombSet = true;
+			return true;
+		}
 					
 		// Shuffle Card implementation
 		if (card.getFace().equals("shuffle")) {
-			//TODO: Change color of card to selected color.
+			card.setColor(cardInfo.get(1));
 			int handSize = player.handSize();
 			for (Card c : player.getCards()) {
 				deck.push(c);
@@ -260,39 +268,48 @@ public class Game {
 			for (int h = 0; h < handSize; h++) {
 				player.addToHand(deck.pop());
 			}
-						
-			//Uncomment this once cardInfo 1 is sent
-			//card.setColor(cardInfo.get(1));
+			return true;
 		}
 					
 		// Wild Card implementation
 		if (card.getFace().equals("wild")) {
 			card.setColor(cardInfo.get(1));
+			return true;
 		}
 		
 		// Swap Card implementation
 		// This has to come before 'actually' playing the card, since if
 		// if it is an invalid move we don't want to change any hands.
 		// Uncomment this once cardInfo 1 and 2 are sent
-//		if (card.getFace().equals("swap")) {
-//			Player otherPlayer = null;
-//			Card otherCard = null;
-//			Card chosenCard = player.searchForCard(cardInfo.get(1));
-//			for (Player p : players) {
-//				Card temp = p.searchForCard(cardInfo.get(2));
-//				if (temp != null) {
-//					otherPlayer = p;
-//					otherCard = temp;
-//				}
-//			}
-//			if (otherPlayer == null || otherCard == null)
-//				return false;
-//						
-//			otherPlayer.removeFromHand(otherCard);
-//			player.removeFromHand(chosenCard);
-//			otherPlayer.addToHand(chosenCard);
-//			player.addToHand(otherCard);
-//		}
+		if (card.getFace().equals("swap")) {
+			if(cardInfo.size() < 3){
+				//It's legal to not swap in some cases:
+				//	- this is the current player's last card
+				//	- there is only one player in the game
+				return player.getCards().size() == 0 || players.size() == 1;
+			}
+			Player otherPlayer = null;
+			Card otherCard = null;
+			Card chosenCard = player.searchForCard(cardInfo.get(1));
+			for (Player p : players) {
+				Card temp = p.searchForCard(cardInfo.get(2));
+				if (temp != null) {
+					otherPlayer = p;
+					otherCard = temp;
+				}
+			}
+			if (otherPlayer == null || otherCard == null)
+				return false;
+						
+			otherPlayer.removeFromHand(otherCard);
+			player.removeFromHand(chosenCard);
+			otherPlayer.addToHand(chosenCard);
+			player.addToHand(otherCard);
+			return true;
+		}
+
+		//This must not be a special card, which is fine
+		return true;
 	}
 	
 	/**

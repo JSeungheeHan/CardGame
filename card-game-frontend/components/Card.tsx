@@ -3,6 +3,7 @@ import { CardInfo } from '../utils/types';
 import { useSpring, easings, animated } from 'react-spring';
 import { useEffect } from 'react';
 import { useAuth } from '../pages';
+import { PromptManager } from './Game';
 
 const drawColors = {
     red: "red",
@@ -21,9 +22,10 @@ interface CardProps {
     rotation: number;
     zIndex: number;
     scale: number;
+    promptManager: PromptManager;
 }
 
-const Card = ({ info, x, y, rotation, deckX, deckY, zIndex, scale }: CardProps) => {
+const Card = ({ info, x, y, rotation, deckX, deckY, zIndex, scale, promptManager }: CardProps) => {
     const [position, api] = useSpring(() => ({ x: deckX, y: deckY, r: 0, flip: 0 }));
     const { makeMove, draw } = useAuth();
 
@@ -60,16 +62,28 @@ const Card = ({ info, x, y, rotation, deckX, deckY, zIndex, scale }: CardProps) 
         }}
         onClick={async () => {
             if(info.selectable){
-                if(info.face == 'deck'){
+                if(promptManager.swapCallback){
+                    //They wanted to swap this card
+                    console.log('swap callbacking');
+                    promptManager.swapCallback(info.id);
+                }else if(info.face == 'deck'){
                     //This is the deck, so draw a card
                     draw();
                 }
                 else if(info.face == 'swap'){
-                    //TODO: get which cards the player wants to swap, then make the call
-                }else if(info.face == 'wild'){
-                    //TODO: get which color the player wants it to be, then make the call
-                    //For now, let's make it always go to red
-                    makeMove([info.id, 'red']);
+                    //Get which cards the player wants to swap, then make the move
+                    promptManager.promptSwap(info.id, selections => {
+                        if(selections.length == 2){
+                            makeMove([info.id, selections[0], selections[1]]);
+                        }else{
+                            makeMove([info.id]);
+                        }
+                    });
+                }else if(info.face == 'wild' || info.face == 'shuffle'){
+                    //Get which color the player wants it to be, then make the move
+                    promptManager.promptColor(color => {
+                        makeMove([info.id, color]);
+                    });
                 }else{
                     makeMove([info.id]);
                 }

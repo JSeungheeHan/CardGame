@@ -71,3 +71,92 @@
     background-color: rgb(171, 114, 190);
     cursor: pointer;
 }
+
+.fade {
+    position: absolute;
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+    left: 0;
+    background-color: black;
+    opacity: .5;
+    z-index: 100;
+}
+
+.colorModal {
+    position: absolute;
+    background-color: white;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 101;
+    padding: 2rem;
+    border-radius: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+}
+
+.colorModalHeader {
+    font-size: x-large;
+    margin-bottom: .5rem;
+    margin-left: 1rem;
+    margin-right: 1rem;
+}
+
+.redModalButton {
+    font-size: large;
+    background-color: red;
+    color: white;
+    cursor: pointer;
+    text-align: center;
+    padding: .5rem;
+    border-radius: .5rem;
+}
+
+.redModalButton:hover {
+    background-color: rgb(247, 103, 103);
+}
+
+.blueModalButton {
+    font-size: large;
+    background-color: blue;
+    color: white;
+    cursor: pointer;
+    text-align: center;
+    padding: .5rem;
+    border-radius: .5rem;
+}
+
+.blueModalButton:hover {
+    background-color: rgb(114, 114, 235);
+}
+
+.greenModalButton {
+    font-size: large;
+    background-color: green;
+    color: white;
+    cursor: pointer;
+    text-align: center;
+    padding: .5rem;
+    border-radius: .5rem;
+}
+
+.greenModalButton:hover {
+    background-color: rgb(79, 190, 79);
+}
+
+.yellowModalButton {
+    font-size: large;
+    background-color: rgb(255, 174, 0);
+    color: white;
+    cursor: pointer;
+    text-align: center;
+    padding: .5rem;
+    border-radius: .5rem;
+}
+
+.yellowModalButton:hover {
+    background-color: rgb(253, 211, 119);
+}

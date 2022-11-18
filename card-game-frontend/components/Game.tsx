@@ -5,7 +5,16 @@ import { GameState, defaultGameState, CardInfo, defaultCard, testGameStates } fr
 import { useAuth } from '../pages';
 import Nameplate from './Nameplate';
 
+export interface PromptManager {
+    promptColor: (callback: (color: string) => void) => void;
+    promptSwap: (swapCardId: string, callback: (selectedCardIds: string[]) => void) => void;
+    swapCallback: undefined | ((selectedCardId: string) => void);
+}
+
 const Game = () => {
+    //Load gamestate (and other things)
+    const { gameState, leaveGame, username, startGame, ichi } = useAuth();
+
     //Figure out dimensions
     const [width, setWidth] = useState<number>(window.innerWidth);
     const [height, setHeight] = useState<number>(window.innerHeight);
@@ -32,8 +41,50 @@ const Game = () => {
         return clearDimensionTimeout;
     }, []);
 
-    //Load the gameState and make sure it exists
-    const { gameState, leaveGame, username, startGame, ichi } = useAuth();
+    //State for special prompt management
+    const [promptState, setPromptState] = useState<'none' | 'color' | 'swap1' | 'swap2'>('none');
+    const promptCallbackRef = useRef<((value: any) => void) | undefined>(undefined);
+    const swapCardIdRef = useRef<string | undefined>(undefined);
+    const firstSwapSelectionRef = useRef<string | undefined>(undefined);
+    const promptManager: PromptManager = {
+        promptColor: (callback) => {
+            if(promptCallbackRef.current != undefined || promptState != 'none'){
+                return;
+            }
+            setPromptState('color');
+            promptCallbackRef.current = callback;
+        },
+        promptSwap: (swapCardId, callback) => {
+            if(promptCallbackRef.current != undefined || promptState != 'none'){
+                return;
+            }
+            if(gameState == undefined || gameState.players[gameState.currentPlayer].hand.length <= 1 || gameState.players.length <= 1){
+                //The swap is impossible in this state, so just resolve with no selections
+                callback([]);
+            }else{
+                setPromptState('swap1');
+                promptCallbackRef.current = callback;
+                swapCardIdRef.current = swapCardId;
+            }
+        },
+        swapCallback: promptState == 'swap1' || promptState == 'swap2' ? (selectedCardId) => {
+            if(promptState == 'swap1'){
+                firstSwapSelectionRef.current = selectedCardId;
+                setPromptState('swap2');
+            }else if(promptState == 'swap2'){
+                resolvePrompt([firstSwapSelectionRef.current, selectedCardId]);
+            }
+        } : undefined
+    };
+    const resolvePrompt = (val: any) => {
+        if(promptCallbackRef.current == undefined){ return; }
+        const callback = promptCallbackRef.current;
+        promptCallbackRef.current = undefined;
+        callback(val);
+        setPromptState('none');
+    }
+
+    //Make sure gameState it exists
     if(gameState == undefined){
         return <div>Error: Game state must be defined!</div>;
     }
@@ -91,6 +142,27 @@ const Game = () => {
         handPositions.unshift(handPositions.pop() as any);
     }
 
+    //If we're currently prompting the player for which cards to swap, change up the selectable values
+    if(promptState == 'swap1'){
+        //make the whole hand except for the played swap card selectable
+        gameState.players = gameState.players.map((player, playerIdx) => ({
+            ...player,
+            hand: player.hand.map((card) => ({
+                ...card,
+                selectable: playerIdx == myIdx && card.id != swapCardIdRef.current
+            }))
+        }));
+    }else if(promptState == 'swap2'){
+        //make all cards that don't belong to this player selectable
+        gameState.players = gameState.players.map((player, playerIdx) => ({
+            ...player,
+            hand: player.hand.map((card) => ({
+                ...card,
+                selectable: playerIdx != myIdx && card.id != swapCardIdRef.current
+            }))
+        }));
+    }
+
     //Make a list of all cards' positions
     const cardPositions: { card: CardInfo, x: number, y: number, r: number, z: number }[] = [];
     gameState.players.forEach((player, playerIdx) => {
@@ -126,7 +198,9 @@ const Game = () => {
         face: "deck",
         color: "special",
         revealed: false,
-        selectable: gameState.currentPlayer != -1 && gameState.players[gameState.currentPlayer].username == username
+        selectable: gameState.currentPlayer != -1
+            && gameState.players[gameState.currentPlayer].username == username
+            && promptState == 'none'
     }
 
     //Figure out which state the game is in
@@ -155,6 +229,7 @@ const Game = () => {
             deckY={deckY}
             zIndex={0}
             scale={cardScale}
+            promptManager={promptManager}
         />
         {cardPositions.map(({ card, x, y, r, z }) => (
             <Card
@@ -167,6 +242,7 @@ const Game = () => {
                 deckY={deckY}
                 zIndex={z}
                 scale={cardScale}
+                promptManager={promptManager}
             />
         ))}
         {/* UI buttons and text */}
@@ -234,6 +310,32 @@ const Game = () => {
             >
                 Ichi!
             </div>
+        </> : null}
+        {/*Popups*/}
+        {promptState == 'color' ? <>
+            <div className={styles.fade} />
+            <div className={styles.colorModal}>
+                <span className={styles.colorModalHeader}>Pick a color!</span>
+                <div className={styles.redModalButton} onClick={() => resolvePrompt('red')}>Red</div>
+                <div className={styles.blueModalButton} onClick={() => resolvePrompt('blue')}>Blue</div>
+                <div className={styles.greenModalButton} onClick={() => resolvePrompt('green')}>Green</div>
+                <div className={styles.yellowModalButton} onClick={() => resolvePrompt('yellow')}>Yellow</div>
+            </div>
+        </> : null}
+        {promptState == 'swap1' || promptState == 'swap2' ? <>
+            <span
+                style={{
+                    position: 'absolute',
+                    top: .65*height + "px",
+                    left: .5*width + "px",
+                    transform: `translate(-50%, -50%) scale(${cardScale})`,
+                    color: 'darkblue',
+                    fontSize: 'x-large',
+                    fontWeight: 'bold'
+                }}
+            >
+                {promptState == 'swap1' ? "Pick a card from your own hand" : "Pick a card from an opponent's hand"}
+            </span>
         </> : null}
     </div>;
 }
