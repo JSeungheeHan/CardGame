@@ -47,14 +47,12 @@ public class Game {
 		
 		//Fill in phase-based info
 		if(currentPhase == Phase.Finished) {
-			//TODO: Once a victor is determined, reflect that here
 			state.victor = firstPlayerWithEmptyHand;
 		}else {
 			state.victor = -1;
 		}
 		
 		if(currentPhase == Phase.Playing) {
-			//TODO: make this info accurate once we have implemented turns
 			state.currentPlayer = currentTurn;
 			state.turnExpiry = turnExpiry;
 		}else {
@@ -363,7 +361,6 @@ public class Game {
 	 * Returns true if that is a legal action, and false otherwise.
 	 */
 	public boolean ichi(String username, int stateId) {
-		//TODO: Implement
 		if(stateId != this.stateId) {
 			System.out.println("Rejecting ichi request for invalid state id");
 			return false;

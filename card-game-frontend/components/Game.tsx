@@ -42,7 +42,7 @@ const Game = () => {
     }, []);
 
     //State for special prompt management
-    const [promptState, setPromptState] = useState<'none' | 'color' | 'swap1' | 'swap2'>('none');
+    const [promptState, setPromptState] = useState<'none' | 'color' | 'swap1' | 'swap2' | 'gameOver'>('none');
     const promptCallbackRef = useRef<((value: any) => void) | undefined>(undefined);
     const swapCardIdRef = useRef<string | undefined>(undefined);
     const firstSwapSelectionRef = useRef<string | undefined>(undefined);
@@ -83,6 +83,12 @@ const Game = () => {
         callback(val);
         setPromptState('none');
     }
+    useEffect(() => {
+        if(gameState != undefined && gameState.victor != -1){
+            setPromptState('gameOver');
+            promptCallbackRef.current = undefined;
+        }
+    }, [gameState]);
 
     //Make sure gameState it exists
     if(gameState == undefined){
@@ -336,6 +342,13 @@ const Game = () => {
             >
                 {promptState == 'swap1' ? "Pick a card from your own hand" : "Pick a card from an opponent's hand"}
             </span>
+        </> : null}
+        {(promptState == 'gameOver' && gameState.players[gameState.victor] != undefined) ? <>
+            <div className={styles.fade} />
+            <div className={styles.colorModal}>
+                <span className={styles.colorModalHeader}>{gameState.players[gameState.victor].username} wins!</span>
+                <div className={styles.blueModalButton} onClick={leaveGame}>Leave Game</div>
+            </div>
         </> : null}
     </div>;
 }
