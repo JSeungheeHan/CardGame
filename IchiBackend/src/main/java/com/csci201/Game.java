@@ -25,6 +25,7 @@ public class Game {
 	private int firstPlayerWithEmptyHand = -1;
 	
 	private final int MAX_PLAYERS = 4;
+	private final int TURN_LENGTH = 15;	//how long, in seconds, it takes for a turn to expire
 	
 	public Game(String gameCode) {
 		this.gameCode = gameCode;
@@ -163,7 +164,10 @@ public class Game {
 				player.addToHand(deck.pop());
 		}
 		PrintDiscardPeek(); // For debugging. Remove later
+
+		//Begin the game
 		currentPhase = Phase.Playing;
+		resetTurnExpiry();
 		return true;
 	}
 	
@@ -218,9 +222,6 @@ public class Game {
 			
 		// Debugging Purposes
 		PrintDiscardPeek();
-			
-		// Player's turn is finished
-		endTurn();
 		
 		// Check if Player is an Ichi candidate - has one card remaining
 		if(player.handSize() == 1) {
@@ -233,6 +234,9 @@ public class Game {
 			currentPhase = Phase.Finished;
 			firstPlayerWithEmptyHand = playerIdx;
 		}
+
+		// Player's turn is finished
+		endTurn();
 			
 		return true;
 	}
@@ -409,9 +413,13 @@ public class Game {
 	 * The timer that calls this function is handled by the GameServer.
 	 * This function only has to carry out the effect of the current turn expiring.
 	 */
-	public void turnExpire() {
-		//TODO: Implement
-		endTurn();
+	public void turnExpire(int stateId) {
+		//get the current player
+		if(currentTurn < 0 || currentTurn >= players.size()){ return; }
+		String currentPlayer = players.get(currentTurn).getUsername();
+
+		//just call draw (this reuses code and gets all special interactions, like bomb card, to work)
+		draw(currentPlayer, stateId);
 	}
 	
 	/**
@@ -419,6 +427,7 @@ public class Game {
 	 * This will increment the state id and reset the turn expiry time
 	 */
 	private void endTurn() {
+		//Advance to next player
 		if (turnDirection)
 			currentTurn++;
 		else
@@ -429,8 +438,21 @@ public class Game {
 		if (currentTurn < 0)
 			currentTurn = players.size() - 1;
 		
+		//Advance state id (so any new messages that originated in the last turn will be rejected)
 		stateId++;
-		//TODO: Implement turn expiry here
+
+		//Reset turn expiry (so that this turn will expire in TURN_LENGTH seconds)
+		resetTurnExpiry();
+	}
+
+	private void resetTurnExpiry() {
+		if(currentPhase == Phase.Playing){
+			long currentTimeMillis = System.currentTimeMillis();
+			long currentTimeSec = currentTimeMillis / 1000L;
+			turnExpiry = (int)(currentTimeSec) + TURN_LENGTH;
+		}else{
+			turnExpiry = -1;
+		}
 	}
 	
 	/**

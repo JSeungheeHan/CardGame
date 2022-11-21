@@ -75,11 +75,10 @@ public class GameServer {
 		return false;
 	}
 
-	public void timerExpire() {
+	public void timerExpire(int stateId) {
 		//The current turn has expired
-		System.out.println("The timer has expired!");
 		turnTimer = null;
-		game.turnExpire();
+		game.turnExpire(stateId);
 		broadcastGameState();
 	}
 	
@@ -97,15 +96,17 @@ public class GameServer {
 		//Send the game state to all connected players
 		//TODO: Make this happen in a multithreaded manner
 		int newTurnExpiry = -1;
+		int newStateId = -1;
 		for(String username : connections.keySet()) {
 			GameState gameState = game.getGameState(username);
 			if(newTurnExpiry == -1 && gameState.turnExpiry != -1) { newTurnExpiry = gameState.turnExpiry; }	//keep track of the a turn expiry so we can set a timer on it
+			if(newStateId == -1){ newStateId = gameState.id; }
 			sendServerMessage(username, null, gameState);
 		}
 		
 		//Start the turn timer
 		if(newTurnExpiry != -1) {
-			turnTimer = new TurnTimerThread(this, newTurnExpiry);
+			turnTimer = new TurnTimerThread(this, newTurnExpiry, newStateId);
 			turnTimer.start();
 		}
 	}

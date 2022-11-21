@@ -223,6 +223,8 @@ const Game = () => {
                 y={handPositions[i].nameY}
                 rotation={handPositions[i].rot}
                 scale={cardScale}
+                hasTurn={gameState.currentPlayer == i}
+                turnExpiry={gameState.turnExpiry}
             />
         ))}
         <Card

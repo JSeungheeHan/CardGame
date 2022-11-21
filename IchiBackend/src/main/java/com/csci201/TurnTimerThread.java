@@ -3,10 +3,12 @@ public class TurnTimerThread extends Thread {
 	
 	private GameServer gameServer;
 	private int expireTime;
+	private int stateId;
 	
-	public TurnTimerThread(GameServer gameServer, int expireTime) {
+	public TurnTimerThread(GameServer gameServer, int expireTime, int stateId) {
 		this.gameServer = gameServer;
 		this.expireTime = expireTime;
+		this.stateId = stateId;
 	}
 
 	public void run() {
@@ -21,7 +23,7 @@ public class TurnTimerThread extends Thread {
 			}
 			
 			//If we get this far without being interrupted, the turn must have expired without a move
-			gameServer.timerExpire();
+			gameServer.timerExpire(stateId);
 		}catch(InterruptedException e) {
 			//This is meant to happen most of the time, so just don't do anything
 		}
