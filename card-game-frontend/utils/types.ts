@@ -8,6 +8,7 @@ export interface GameState {
     turnExpiry: number;
     victor: number;
     gameCode: string;
+    canIchi: boolean;
 };
 
 export interface PlayerInfo {
@@ -56,7 +57,8 @@ export const defaultGameState: GameState = {
     currentPlayer: -1,
     turnExpiry: -1,
     victor: -1,
-    gameCode: "AAAA"
+    gameCode: "AAAA",
+    canIchi: false
 };
 
 export const defaultPlayerInfo: PlayerInfo = {
@@ -101,7 +103,8 @@ export const testGameStates: GameState[] = [
         currentPlayer: -1,
         turnExpiry: -1,
         victor: -1,
-        gameCode: "AAAA"
+        gameCode: "AAAA",
+        canIchi: false
     },
     {
         id: 1,
@@ -116,7 +119,8 @@ export const testGameStates: GameState[] = [
         currentPlayer: 0,
         turnExpiry: -1,
         victor: -1,
-        gameCode: "AAAA"
+        gameCode: "AAAA",
+        canIchi: false
     },
     {
         id: 2,
@@ -131,7 +135,8 @@ export const testGameStates: GameState[] = [
         currentPlayer: 1,
         turnExpiry: -1,
         victor: -1,
-        gameCode: "AAAA"
+        gameCode: "AAAA",
+        canIchi: false
     },
     {
         id: 3,
@@ -146,7 +151,8 @@ export const testGameStates: GameState[] = [
         currentPlayer: 2,
         turnExpiry: -1,
         victor: -1,
-        gameCode: "AAAA"
+        gameCode: "AAAA",
+        canIchi: false
     },
     {
         id: 4,
@@ -161,7 +167,8 @@ export const testGameStates: GameState[] = [
         currentPlayer: 3,
         turnExpiry: -1,
         victor: -1,
-        gameCode: "AAAA"
+        gameCode: "AAAA",
+        canIchi: false
     },
     {
         id: 5,
@@ -176,7 +183,8 @@ export const testGameStates: GameState[] = [
         currentPlayer: 0,
         turnExpiry: -1,
         victor: -1,
-        gameCode: "AAAA"
+        gameCode: "AAAA",
+        canIchi: false
     },
     {
         id: 6,
@@ -191,6 +199,7 @@ export const testGameStates: GameState[] = [
         currentPlayer: 1,
         turnExpiry: -1,
         victor: -1,
-        gameCode: "AAAA"
+        gameCode: "AAAA",
+        canIchi: false
     },
 ];

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import styles from '../styles/Game.module.css'
 import Card from './Card';
 import { GameState, defaultGameState, CardInfo, defaultCard, testGameStates } from '../utils/types';
@@ -89,6 +89,16 @@ const Game = () => {
             promptCallbackRef.current = undefined;
         }
     }, [gameState]);
+
+    //Figure out where the ichi button should be
+    const ichiPos = useMemo(() => {
+        const ichiButtonMargin = 60;
+        return {
+            x: ichiButtonMargin + Math.random() * (width - 2*ichiButtonMargin),
+            y: ichiButtonMargin + Math.random() * (height - 2*ichiButtonMargin)
+        };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [gameState?.canIchi]);
 
     //Make sure gameState it exists
     if(gameState == undefined){
@@ -211,7 +221,7 @@ const Game = () => {
 
     //Figure out which state the game is in
     const inLobby = gameState.currentPlayer == -1 && gameState.victor == -1;
-    const canIchi = gameState.currentPlayer != -1 && gameState.victor == -1;
+    const canIchi = gameState.currentPlayer != -1 && gameState.victor == -1 && gameState.canIchi;
     
     //Render html
     return <div className={styles.container}>
@@ -315,6 +325,12 @@ const Game = () => {
             <div
                 className={styles.ichiButton}
                 onClick={() => ichi()}
+                style={{
+                    top: ichiPos.x,
+                    left: ichiPos.y,
+                    transform: `translate(-50%, -50%) scale(${cardScale})`,
+                    zIndex: 200
+                }}
             >
                 Ichi!
             </div>

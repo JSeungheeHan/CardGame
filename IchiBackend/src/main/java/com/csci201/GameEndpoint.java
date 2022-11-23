@@ -18,7 +18,7 @@ public class GameEndpoint {
 	
 	@OnOpen
 	public void onOpen(Session session) {
-		
+		session.setMaxIdleTimeout(0);
 	}
 	
 	

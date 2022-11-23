@@ -57,8 +57,6 @@
 
 .ichiButton {
     position: absolute;
-    top: 1rem;
-    right: 1rem;
     background-color: rgb(186, 19, 242);
     padding: 1rem;
     border-radius: .5rem;

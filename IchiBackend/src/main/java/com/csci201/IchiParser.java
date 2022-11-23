@@ -35,6 +35,7 @@ class GameState {
 	public int turnExpiry;
 	public int victor;
 	public String gameCode;
+	public boolean canIchi;
 }
 
 class PlayerInfo {

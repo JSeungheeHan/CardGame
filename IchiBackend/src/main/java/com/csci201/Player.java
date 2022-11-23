@@ -30,6 +30,8 @@ public class Player {
 	 */
 	public void addToHand(Card card) {
 		playerCards.add(card);
+		//update whether this player can be ichi'd
+		ichiStatus = playerCards.size() == 1;
 	}
 	
 	public void removeFromHand(Card card) {

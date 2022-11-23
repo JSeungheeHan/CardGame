@@ -99,6 +99,15 @@ public class Game {
 			state.players.add(info);
 		}
 		
+		//Check if any players are vulnerable to an ichi call
+		state.canIchi = false;
+		for(Player p : players){
+			if(p.getIchiStatus()){
+				state.canIchi = true;
+				break;
+			}
+		}
+		
 		//Return
 		return state;
 	}
@@ -134,9 +143,30 @@ public class Game {
 	 * This may be complicated, since the game could be under way and it could even be this player's turn.
 	 */
 	public void removePlayer(String username) {
+		//If the player doesn't exist or the game is over, don't remove them
+		//we don't remove them once the game is over because it will cause bugs if the winner were to be removed
+		//plus, there's no risk of yielding the turn to a player who isn't in the game at that point
 		int playerIdx = getPlayerIndex(username);
+		if(playerIdx == -1 || currentPhase == Phase.Finished){ return; }
+
+		//if it's currently this player's turn, make them pass
+		if(playerIdx == currentTurn){
+			endTurn();
+		}
+
+		//if we tried to pass the turn but it didn't work (probably meaning this is the only player in the game), just don't remove them
+		//this might cause bugs, but having 0 players in a game would surely break something in a worse way
+		if(playerIdx == currentTurn){
+			return;
+		}
+		
+		//remove the player from the game
 		players.remove(playerIdx);
-		//TODO: Make sure everything is properly fixed -- especially if it's currently this player's turn
+
+		//fix currentTurn index
+		if(currentTurn > playerIdx){
+			currentTurn--;
+		}
 	}
 	
 	/**
@@ -160,7 +190,7 @@ public class Game {
 		
 		// Draw seven cards to each player
 		for (Player player : players) {
-			while (player.handSize() < 7)
+			while (player.handSize() < 2)
 				player.addToHand(deck.pop());
 		}
 		PrintDiscardPeek(); // For debugging. Remove later
