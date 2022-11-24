@@ -7,7 +7,7 @@ import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import { ClientMessage, GameState, PlayerStatistics, ServerMessage, testGameStates } from '../utils/types'
 import HomePage from '../components/HomePage'
 
-import { uniqueNamesGenerator, adjectives, colors, animals } from 'unique-names-generator'
+import { uniqueNamesGenerator, adjectives, animals } from 'unique-names-generator'
 
 export interface AuthContextType {
   loggedIn: boolean;
@@ -42,36 +42,85 @@ const Home: NextPage = () => {
   //State
   const [loggedIn, setLoggedIn] = useState<boolean>(false);
   const [username, setUsername] = useState<string>("");
-  useEffect(() => {setUsername(makeGuestUsername())}, []);
   const [gameState, setGameState] = useState<GameState | undefined>(undefined);
-  //useEffect(() => setGameState(testGameStates[1]), []);
   const [joinError, setJoinError] = useState<string | undefined>(undefined);
   const socketRef = useRef<WebSocket | undefined>(undefined);
   const messageQueueRef = useRef<ClientMessage[]>([]);
 
+  //Load user info
+  useEffect(() => {
+    const loadedUsername = localStorage.getItem("username");
+    if(loadedUsername == null){
+      setLoggedIn(false);
+      setUsername(makeGuestUsername());
+    }else{
+      setLoggedIn(true);
+      setUsername(loadedUsername);
+    }
+  }, []);
+
   //Define functions
-  const login = (newUsername: string, newPassword: string): Promise<string> => {
-    //TODO: validate this username and password
-    setLoggedIn(true);
-    setUsername(newUsername);
-    return Promise.resolve("");
+  const apiPost = async (endpoint: string, body: string) => {
+    const response = await fetch(env.apiUrl + endpoint, {
+      mode: 'cors',
+      cache: 'no-cache',
+      headers: {
+        'Access-Control-Allow-Origin':'*'
+      },
+      method: 'POST',
+      body: body
+    })
+    return await response.text();
+  };
+
+  const login = async (newUsername: string, newPassword: string) => {
+    //TODO: validate newUsername and newPassword don't have spaces
+    if(newUsername == "" || newPassword == ""){
+      return "Please enter a username and password";
+    }
+    if(newUsername.indexOf(" ") != -1 || newPassword.indexOf(" ") != -1){
+      return "Username and password cannot contain spaces";
+    }
+    const res = await apiPost("/login", newUsername + " " + newPassword);
+    if(res == "Success"){
+      setLoggedIn(true);
+      setUsername(newUsername);
+      localStorage.setItem("username", newUsername);
+      return "";
+    }
+    return "Login failed -- check your username and password";
   }
 
   const logout = (): void => {
     if(loggedIn){
       setLoggedIn(false);
       setUsername(makeGuestUsername());
+      localStorage.removeItem("username");
     }
   }
 
-  const createAccount = (newUsername: string, newPassword: string): Promise<string> => {
-    //TODO: send this to the frontend and validate its success
-    return login(newUsername, newPassword);
+  const createAccount = async (newUsername: string, newPassword: string): Promise<string> => {
+    if(newUsername == "" || newPassword == ""){
+      return "Please enter a username and password";
+    }
+    if(newUsername.indexOf(" ") != -1 || newPassword.indexOf(" ") != -1){
+      return "Username and password cannot contain spaces";
+    }
+    const res = await apiPost("/createAccount", newUsername + " " + newPassword);
+    if(res == "Success"){
+      setLoggedIn(true);
+      setUsername(newUsername);
+      localStorage.setItem("username", newUsername);
+      return "";
+    }
+    return "Account creation failed. An account with that username may already exist.";
   }
 
-  const getStats = (): Promise<PlayerStatistics | undefined> => {
-    //TODO: get stats from backend
-    return Promise.resolve(undefined);
+  const getStats = async (): Promise<PlayerStatistics | undefined> => {
+    const res = await apiPost('/get', username);
+    console.log("plaintext res is", res);
+    const stats: PlayerStatistics = JSON.parse(res);
+    return stats;
   }
 
   const connectWebSocket = () => {
@@ -179,6 +228,9 @@ const Home: NextPage = () => {
       console.log("Error: tried to create game while already connected to game.");
       return;
     }
+
+    //Clear the old error
+    setJoinError(undefined);
 
     //Make the connection
     connectWebSocket();

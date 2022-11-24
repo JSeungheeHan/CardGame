@@ -38,7 +38,10 @@ export interface ServerMessage {
 }
 
 export interface PlayerStatistics {
-
+    gamesWon: number;
+    gamesLost: number;
+    username: string;
+    dateJoined: string;
 }
 
 export const defaultCard: CardInfo = {

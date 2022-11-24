@@ -32,14 +32,13 @@ public class GetServlet extends HttpServlet {
 	
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		System.out.println("ENV var is " + System.getenv("GOOGLE_APPLICATION_CREDENTIALS"));
-		response.getWriter().append(System.getenv("GOOGLE_APPLICATION_CREDENTIALS"));
 		//INPUTS: username, field
 		//OUTPUTS: The value at the field. Returns null if can't read a string field, -1 if integer.
 		//Failure if the username or field does not exist.
 		String input = request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
 		String[] strs = input.split(" ");
 		String username = strs[0];
-		String field = strs[1];
+		//String field = strs[1];
 		
 		//Initializing necessary variables. TODO: change from localhost to public host later on.
 		Connection con = null;
@@ -52,6 +51,10 @@ public class GetServlet extends HttpServlet {
 		Statement st = null;
 		ResultSet rs = null;
 		boolean result = false;
+
+		//response headers
+		response.addHeader("Access-Control-Allow-Origin", "*");
+		response.addHeader("Access-Control-Allow-Methods","GET, OPTIONS, HEAD, PUT, POST");	
 		
 		try {
 			//Updates the value at the field. This fails if the field doesn't exist.
@@ -61,7 +64,7 @@ public class GetServlet extends HttpServlet {
 			rs = st.executeQuery("SELECT * from accountdata WHERE accountdata.Username='" + username + "'");
 			rs.next();
 			//Returns the value at the field of the entry if found.
-			if(field.equals("GamesWon") || field.equals("GamesLost") || field.equals("Password"))
+			/*if(field.equals("GamesWon") || field.equals("GamesLost") || field.equals("Password"))
 			{
 				response.getWriter().append("" + rs.getInt(field));
 				result = true;
@@ -70,7 +73,16 @@ public class GetServlet extends HttpServlet {
 			{
 				response.getWriter().append("" + rs.getString(field));
 				result = true;
-			}
+			}*/
+			String resJson = "{";
+			resJson += "\"gamesWon\":" + rs.getInt("GamesWon");
+			resJson += ",\"gamesLost\":" + rs.getInt("GamesLost");
+			resJson += ",\"username\":" + rs.getString("Username");
+			resJson += ",\"dateJoined\":" + rs.getString("DateJoined");
+			resJson += "}";
+			System.out.println("resJson is " + resJson);
+			response.getWriter().append(resJson);
+			result = true;
 		}
 		catch (Exception e)
 		{
@@ -84,6 +96,14 @@ public class GetServlet extends HttpServlet {
 			//Sends failure if username or field is invalid.
 			response.getWriter().append("Failure");
 		}
+	}
+
+	public void doOptions(HttpServletRequest req, HttpServletResponse resp)
+        throws IOException {
+		resp.setHeader("Access-Control-Allow-Headers", "*");
+		resp.setHeader("Access-Control-Allow-Origin", "*");
+		resp.setHeader("Access-Control-Allow-Methods","GET, OPTIONS, HEAD, PUT, POST");
+
 	}
 
 }

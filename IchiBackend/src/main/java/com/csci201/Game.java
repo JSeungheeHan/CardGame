@@ -190,7 +190,7 @@ public class Game {
 		
 		// Draw seven cards to each player
 		for (Player player : players) {
-			while (player.handSize() < 2)
+			while (player.handSize() < 7)
 				player.addToHand(deck.pop());
 		}
 		PrintDiscardPeek(); // For debugging. Remove later

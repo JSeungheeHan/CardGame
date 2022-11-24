@@ -103,7 +103,17 @@ public class LoginServlet extends HttpServlet {
 		}
 		
 		//Send a response, whether login was successful or not.
+		response.addHeader("Access-Control-Allow-Origin", "*");
+		response.addHeader("Access-Control-Allow-Methods","GET, OPTIONS, HEAD, PUT, POST");
 		response.getWriter().append(result ? "Success" : "Failure");
+	}
+
+	public void doOptions(HttpServletRequest req, HttpServletResponse resp)
+        throws IOException {
+		resp.setHeader("Access-Control-Allow-Headers", "*");
+		resp.setHeader("Access-Control-Allow-Origin", "*");
+		resp.setHeader("Access-Control-Allow-Methods","GET, OPTIONS, HEAD, PUT, POST");
+
 	}
 
 }
