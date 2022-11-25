@@ -75,11 +75,11 @@ public class GetServlet extends HttpServlet {
 				result = true;
 			}*/
 			String resJson = "{";
-			resJson += "\"gamesWon\":" + rs.getInt("GamesWon");
-			resJson += ",\"gamesLost\":" + rs.getInt("GamesLost");
-			resJson += ",\"username\":" + rs.getString("Username");
-			resJson += ",\"dateJoined\":" + rs.getString("DateJoined");
-			resJson += "}";
+			resJson += "\n\"gamesWon\": " + rs.getInt("GamesWon");
+			resJson += ",\n\"gamesLost\": " + rs.getInt("GamesLost");
+			resJson += ",\n\"username\": \"" + rs.getString("Username") + "\"";
+			resJson += ",\n\"dateJoined\": \"" + rs.getString("DateJoined") + "\"";
+			resJson += "\n}";
 			System.out.println("resJson is " + resJson);
 			response.getWriter().append(resJson);
 			result = true;

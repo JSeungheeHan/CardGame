@@ -1,4 +1,9 @@
 package com.csci201;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -263,6 +268,49 @@ public class Game {
 			System.out.printf("Player: %s has won the game!\n", username);
 			currentPhase = Phase.Finished;
 			firstPlayerWithEmptyHand = playerIdx;
+			
+			Connection con = null;
+			try {
+				con = DriverManager.getConnection("jdbc:mysql:///cardgame?cloudSqlInstance=ichi-366421:us-central1:root&socketFactory=com.google.cloud.sql.mysql.SocketFactory&user=root&password=root");
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				System.out.println(e.getMessage());
+			}	
+			Statement st = null;
+			
+			try {
+				//Updates the value at the field. This fails if the field doesn't exist.
+				//TODO: Make it fail if the username can't be found.
+				st = con.createStatement();
+				ResultSet rs = null;
+				rs = st.executeQuery("SELECT * from accountdata WHERE accountdata.Username='" + player.getUsername() + "'");
+				rs.next();
+				int currentWin = rs.getInt("GamesWon");
+				currentWin++;
+				st.executeUpdate("UPDATE accountdata s SET s.GamesWon=" + currentWin + " WHERE s.Username='" + player.getUsername() +"'");
+			}
+			catch (Exception e)
+			{
+				System.out.println(e.getMessage());
+			}
+			
+			for (Player play : players) {
+				if(!play.getUsername().equals(player.getUsername()))
+				{
+					try {
+						ResultSet rs = null;
+						rs = st.executeQuery("SELECT * from accountdata WHERE accountdata.Username='" + play.getUsername() + "'");
+						rs.next();
+						int currentLoss = rs.getInt("GamesLost");
+						currentLoss++;
+						st.executeUpdate("UPDATE accountdata s SET s.GamesLost=" + currentLoss + " WHERE s.Username='" + play.getUsername() +"'");
+					}
+					catch (Exception e)
+					{
+						System.out.println(e.getMessage());
+					}
+				}
+			}
 		}
 
 		// Player's turn is finished
