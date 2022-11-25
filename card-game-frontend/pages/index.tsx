@@ -41,7 +41,7 @@ const makeGuestUsername = () => {
 const Home: NextPage = () => {
   //State
   const [loggedIn, setLoggedIn] = useState<boolean>(false);
-  const [username, setUsername] = useState<string>("");
+  const [username, setUsername] = useState<string>(makeGuestUsername());
   const [gameState, setGameState] = useState<GameState | undefined>(undefined);
   const [joinError, setJoinError] = useState<string | undefined>(undefined);
   const socketRef = useRef<WebSocket | undefined>(undefined);
@@ -51,8 +51,7 @@ const Home: NextPage = () => {
   useEffect(() => {
     const loadedUsername = localStorage.getItem("username");
     if(loadedUsername == null){
-      setLoggedIn(false);
-      setUsername(makeGuestUsername());
+      //leave values at defaults
     }else{
       setLoggedIn(true);
       setUsername(loadedUsername);
@@ -119,8 +118,13 @@ const Home: NextPage = () => {
   const getStats = async (): Promise<PlayerStatistics | undefined> => {
     const res = await apiPost('/get', username);
     console.log("plaintext res is", res);
-    const stats: PlayerStatistics = JSON.parse(res);
-    return stats;
+    if(res == "Failure"){
+      console.log("failed to get statistics for user", username);
+      return undefined;
+    }else{
+      const stats: PlayerStatistics = JSON.parse(res);
+      return stats;
+    }
   }
 
   const connectWebSocket = () => {

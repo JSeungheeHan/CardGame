@@ -140,3 +140,22 @@
     align-items: center;
     row-gap: 1rem;
 }
+
+.statsTitle {
+    color: rgb(188, 188, 188);
+    font-size: x-large;
+    font-weight: 600;
+    margin-top: .4rem;
+}
+
+.stats {
+    color: rgb(188, 188, 188);
+}
+
+.introText {
+    font-size: large;
+    color: white;
+    max-width: 25rem;
+    margin-bottom: 2.5rem;
+    text-align: center;
+}

@@ -191,7 +191,7 @@ const Game = () => {
                 x: handX + cardSeparation*cardOffsetX* (cardIdx - player.hand.length/2 + .5),
                 y: handY + cardSeparation*cardOffsetY* (cardIdx - player.hand.length/2 + .5),
                 r: handRot,
-                z: cardIdx
+                z: cardIdx + (playerIdx == myIdx ? 15 : 0)
             });
         });
     });

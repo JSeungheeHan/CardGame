@@ -38,14 +38,14 @@ public class GetServlet extends HttpServlet {
 		String input = request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
 		String[] strs = input.split(" ");
 		String username = strs[0];
+		System.out.println("USERNAME INPUT IS -" + username + "-");
 		//String field = strs[1];
 		
-		//Initializing necessary variables. TODO: change from localhost to public host later on.
+		//Initializing necessary variables.
 		Connection con = null;
 		try {
 			con = DriverManager.getConnection("jdbc:mysql:///cardgame?cloudSqlInstance=ichi-366421:us-central1:root&socketFactory=com.google.cloud.sql.mysql.SocketFactory&user=root&password=root");
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}	
 		Statement st = null;
@@ -87,7 +87,7 @@ public class GetServlet extends HttpServlet {
 		catch (Exception e)
 		{
 			//sends failure if there is an error.
-			response.getWriter().append(e.getMessage());
+			System.out.println(e.getMessage());
 			result = false;
 		}
 		
