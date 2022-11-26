@@ -42,7 +42,7 @@ const HomePage = () => {
         <span className={styles.introText}>{"To join a friend's game, enter their 4-letter game code. To create a game and track your statistics, log in or create an account."}</span>
         <div className={styles.joinDiv}>
             <div className={styles.innerJoinDiv}>
-            <input type="text" maxLength={4} placeholder="CODE" className={styles.codeInput} value={codeInput} onChange={(e) => setCodeInput(e.target.value)} />
+            <input type="text" maxLength={4} placeholder="CODE" className={styles.codeInput} value={codeInput} onChange={(e) => setCodeInput(e.target.value)} spellCheck={false} />
             <Button text="Join Game" onClick={() => joinGame(codeInput)} />
             </div>
             {joinError != undefined ? <span className={styles.error}>

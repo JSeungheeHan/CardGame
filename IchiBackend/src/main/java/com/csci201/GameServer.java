@@ -3,6 +3,10 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.lang.Runnable;
 
 import javax.websocket.Session;
 
@@ -85,6 +89,24 @@ public class GameServer {
 	public boolean hasPlayers() {
 		return connections.size() > 0;
 	}
+
+	class MessageSender implements Runnable {
+
+		String username;
+		String error;
+		GameState gameState;
+
+		public MessageSender(String username, String error, GameState gameState) {
+			this.username = username;
+			this.error = error;
+			this.gameState = gameState;
+		}
+
+		public void run() {
+			sendServerMessage(username, error, gameState);
+		}
+
+	}
 	
 	private void broadcastGameState() {
 		//Stop the turn timer
@@ -93,15 +115,23 @@ public class GameServer {
 			turnTimer = null;
 		}
 		
-		//Send the game state to all connected players
-		//TODO: Make this happen in a multithreaded manner
+		//Generate all game states to send to each player
+		ExecutorService executor = Executors.newFixedThreadPool(connections.keySet().size());
 		int newTurnExpiry = -1;
 		int newStateId = -1;
 		for(String username : connections.keySet()) {
 			GameState gameState = game.getGameState(username);
 			if(newTurnExpiry == -1 && gameState.turnExpiry != -1) { newTurnExpiry = gameState.turnExpiry; }	//keep track of the a turn expiry so we can set a timer on it
 			if(newStateId == -1){ newStateId = gameState.id; }
-			sendServerMessage(username, null, gameState);
+			executor.execute(new MessageSender(username, null, gameState));
+		}
+
+		//Send all the messages (using multithreading so they're all sent at once)
+		executor.shutdown();
+		try{
+			executor.awaitTermination(5, TimeUnit.SECONDS);
+		}catch(Exception e){
+			System.out.println("Exception while sending messages: " + e.getMessage());
 		}
 		
 		//Start the turn timer

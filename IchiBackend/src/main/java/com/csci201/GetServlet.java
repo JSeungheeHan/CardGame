@@ -32,14 +32,12 @@ public class GetServlet extends HttpServlet {
 	
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		System.out.println("ENV var is " + System.getenv("GOOGLE_APPLICATION_CREDENTIALS"));
-		//INPUTS: username, field
-		//OUTPUTS: The value at the field. Returns null if can't read a string field, -1 if integer.
-		//Failure if the username or field does not exist.
+		//INPUTS: username
+		//OUTPUTS: JSON containing the stats, or "Failure"
+		//Failure if the username does not exist.
 		String input = request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
 		String[] strs = input.split(" ");
 		String username = strs[0];
-		System.out.println("USERNAME INPUT IS -" + username + "-");
-		//String field = strs[1];
 		
 		//Initializing necessary variables.
 		Connection con = null;
@@ -63,24 +61,13 @@ public class GetServlet extends HttpServlet {
 			//Finds the entry in the table with the given username
 			rs = st.executeQuery("SELECT * from accountdata WHERE accountdata.Username='" + username + "'");
 			rs.next();
-			//Returns the value at the field of the entry if found.
-			/*if(field.equals("GamesWon") || field.equals("GamesLost") || field.equals("Password"))
-			{
-				response.getWriter().append("" + rs.getInt(field));
-				result = true;
-			}
-			if(field.equals("Username") || field.equals("DateJoined"))
-			{
-				response.getWriter().append("" + rs.getString(field));
-				result = true;
-			}*/
+			//Return the JSON containing the info
 			String resJson = "{";
 			resJson += "\n\"gamesWon\": " + rs.getInt("GamesWon");
 			resJson += ",\n\"gamesLost\": " + rs.getInt("GamesLost");
 			resJson += ",\n\"username\": \"" + rs.getString("Username") + "\"";
 			resJson += ",\n\"dateJoined\": \"" + rs.getString("DateJoined") + "\"";
 			resJson += "\n}";
-			System.out.println("resJson is " + resJson);
 			response.getWriter().append(resJson);
 			result = true;
 		}
