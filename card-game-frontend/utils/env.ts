@@ -7,8 +7,8 @@ let env = {
 
 if(prod){
     env = {
-        gameEndpoint: "wss://backend-dot-ichi-366421.uc.r.appspot.com/game",
-        apiUrl: "https://backend-dot-ichi-366421.uc.r.appspot.com"
+        gameEndpoint: "wss://backend-dot-ichiwest.wl.r.appspot.com/game",
+        apiUrl: "https://backend-dot-ichiwest.wl.r.appspot.com"
     }
 }
 

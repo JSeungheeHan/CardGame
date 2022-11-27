@@ -1,7 +1,0 @@
-runtime: java17
-env: standard
-service: ichi-backend
-handlers:
-  - url: /.*
-    secure: always
-    script: auto
