@@ -41,9 +41,10 @@ public class UpdateServlet extends HttpServlet {
 		//Initializing necessary variables. TODO: change from localhost to public host later on.
 		Connection con = null;
 		try {
-			con = DriverManager.getConnection("\"jdbc:mysql:///cardgame?cloudSqlInstance=ichi-366421:us-central1:root&socketFactory=com.google.cloud.sql.mysql.SocketFactory&user=root&password=root");
+			con = DriverManager.getConnection("jdbc:mysql:///cardgame?cloudSqlInstance=ichiwest:us-central1:root&socketFactory=com.google.cloud.sql.mysql.SocketFactory&user=root&password=root");
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
+			response.getWriter().append(e.getMessage());
 			e.printStackTrace();
 		}	
 		Statement st = null;
@@ -53,10 +54,19 @@ public class UpdateServlet extends HttpServlet {
 			//Updates the value at the field. This fails if the field doesn't exist.
 			//TODO: Make it fail if the username can't be found.
 			st = con.createStatement();
-			st.executeUpdate("UPDATE accountdata s SET s." + field + "='" + value + "' WHERE s.Username='" + username +"'");
+			if(field.equals("GamesWon") || field.equals("GamesLost"))
+			{
+				st.executeUpdate("UPDATE accountdata s SET s." + field + "=" + value + " WHERE s.Username='" + username +"'");
+			}
+			else
+			{
+				st.executeUpdate("UPDATE accountdata s SET s." + field + "='" + value + "' WHERE s.Username='" + username +"'");
+			}
 		}
 		catch (Exception e)
 		{
+
+			response.getWriter().append(e.getMessage());
 			result = false;
 		}
 		

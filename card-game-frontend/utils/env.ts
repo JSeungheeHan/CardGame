@@ -1,4 +1,4 @@
-const prod = false;    //Change this before deploying
+const prod = true;    //Change this before deploying
 
 let env = {
     gameEndpoint: "ws://localhost:8080/game",
