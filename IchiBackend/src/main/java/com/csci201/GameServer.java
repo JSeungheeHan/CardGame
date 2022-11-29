@@ -116,28 +116,30 @@ public class GameServer {
 		}
 		
 		//Generate all game states to send to each player
-		ExecutorService executor = Executors.newFixedThreadPool(connections.keySet().size());
-		int newTurnExpiry = -1;
-		int newStateId = -1;
-		for(String username : connections.keySet()) {
-			GameState gameState = game.getGameState(username);
-			if(newTurnExpiry == -1 && gameState.turnExpiry != -1) { newTurnExpiry = gameState.turnExpiry; }	//keep track of the a turn expiry so we can set a timer on it
-			if(newStateId == -1){ newStateId = gameState.id; }
-			executor.execute(new MessageSender(username, null, gameState));
-		}
+		if(connections.keySet().size() > 0){
+			ExecutorService executor = Executors.newFixedThreadPool(connections.keySet().size());
+			int newTurnExpiry = -1;
+			int newStateId = -1;
+			for(String username : connections.keySet()) {
+				GameState gameState = game.getGameState(username);
+				if(newTurnExpiry == -1 && gameState.turnExpiry != -1) { newTurnExpiry = gameState.turnExpiry; }	//keep track of the a turn expiry so we can set a timer on it
+				if(newStateId == -1){ newStateId = gameState.id; }
+				executor.execute(new MessageSender(username, null, gameState));
+			}
 
-		//Send all the messages (using multithreading so they're all sent at once)
-		executor.shutdown();
-		try{
-			executor.awaitTermination(5, TimeUnit.SECONDS);
-		}catch(Exception e){
-			System.out.println("Exception while sending messages: " + e.getMessage());
-		}
-		
-		//Start the turn timer
-		if(newTurnExpiry != -1) {
-			turnTimer = new TurnTimerThread(this, newTurnExpiry, newStateId);
-			turnTimer.start();
+			//Send all the messages (using multithreading so they're all sent at once)
+			executor.shutdown();
+			try{
+				executor.awaitTermination(5, TimeUnit.SECONDS);
+			}catch(Exception e){
+				System.out.println("Exception while sending messages: " + e.getMessage());
+			}
+			
+			//Start the turn timer
+			if(newTurnExpiry != -1) {
+				turnTimer = new TurnTimerThread(this, newTurnExpiry, newStateId);
+				turnTimer.start();
+			}
 		}
 	}
 	

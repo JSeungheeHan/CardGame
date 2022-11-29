@@ -92,10 +92,10 @@ const Game = () => {
 
     //Figure out where the ichi button should be
     const ichiPos = useMemo(() => {
-        const ichiButtonMargin = 60;
+        const ichiButtonMargin = 10;
         return {
-            x: ichiButtonMargin + Math.random() * (width - 2*ichiButtonMargin),
-            y: ichiButtonMargin + Math.random() * (height - 2*ichiButtonMargin)
+            x: Math.round(ichiButtonMargin + Math.random() * (100 - 2*ichiButtonMargin)),
+            y: Math.round(ichiButtonMargin + Math.random() * (100 - 2*ichiButtonMargin))
         };
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [gameState?.canIchi]);
@@ -326,8 +326,8 @@ const Game = () => {
                 className={styles.ichiButton}
                 onClick={() => ichi()}
                 style={{
-                    top: ichiPos.x,
-                    left: ichiPos.y,
+                    top: ichiPos.x + "%",
+                    left: ichiPos.y + "%",
                     transform: `translate(-50%, -50%) scale(${cardScale})`,
                     zIndex: 200
                 }}

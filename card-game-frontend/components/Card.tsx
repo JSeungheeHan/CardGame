@@ -103,6 +103,7 @@ const Card = ({ info, x, y, rotation, deckX, deckY, zIndex, scale, promptManager
                     className={styles.cardFace}
                     style={{
                         backgroundColor: drawColor,
+                        opacity: position.flip.to(f => f >= .5 ? 1 : 0)
                     }}
                 >
                     {info.face}
